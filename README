@@ -1,0 +1,7 @@
+This is the ml project. It's a clone of the ci-bayes project, and
+is identical in codebase, although development is expected to proceed.
+
+The ml project is designed to implement a range of machine learning
+algorithms, primarily focusing on classification. The initial codebase
+is aimed at providing bayes classification, with other types of
+classification engines following.
