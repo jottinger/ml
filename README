@@ -5,3 +5,65 @@ The ml project is designed to implement a range of machine learning
 algorithms, primarily focusing on classification. The initial codebase
 is aimed at providing bayes classification, with other types of
 classification engines following.
+
+Using the Bayes Classifier
+
+There are two Bayesian classifiers included: a simple (naive) classifier,
+and a Fisher classifier. In general, the Fisher classifier is "better."
+(As usual, your results may vary depending on your use case.)
+
+Using the classifier is simple:
+
+// the default data factory is datagrid-based, see Infinispan documentation
+Classifier classifier=new FisherClassifier();
+
+// training phase
+classifier.train("the quick brown fox jumps over the lazy dog's tail", "dog");
+classifier.train("that cat is going out with a fox", "cat");
+
+// classification phase
+String classification=classifier.classify("this is a some text");
+
+You can also provide a default classification to the classifier:
+
+// classification phase
+String classification=classifier.classify("this is a some text", "unknown");
+
+Persisting the dataset involves the creation of a ClassifierDataFactory.
+The default data factory is based on Infinispan, which is a key/value-based
+data grid.
+
+Ideally, one would configure Infinispan to use a backing datastore to
+persist the training data.
+
+Using the Perceptron
+
+A perceptron follows the same general modus as the Bayesian Classifier, with
+one extra step: the data repository.
+
+To use the perceptron, one creates the repository (a repository based on HSQLDB
+is provided), then one creates the perceptron with that repository, then
+the perceptron is trained, and then queried.
+
+An example:
+
+PerceptronRepository repo = new HSQLDBPerceptronRepository();
+Perceptron perceptron=new PerceptronImpl(repo);
+
+// training phase
+// note: the API is likely to become much easier to use...
+// this construct is really, really ugly. I wish Java would
+// allow me to declare lists inline...
+Object[] corpusArray=new Object[]{"half", "the", "world"};
+Object[] targetArray=new Object[]{"test for echo", "counterparts"};
+List<Object> corpus=Arrays.asList(corpusArray);
+List<Object> targets=Arrays.asList(targetArray);
+
+// one provides the source text, the list of targets to consider, then
+// the actual target
+perceptron.train(corpus, targets, "test for echo");
+
+// getResults returns a List of PerceptronResults
+Object classification=perceptron.getResults(corpus, targets).get(0).getTarget();
+
+Again, the perceptron's API is likely to be streamlined soon.

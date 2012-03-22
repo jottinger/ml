@@ -9,6 +9,14 @@ public class PerceptronResult implements Comparable<PerceptronResult> {
         this.strength = strength;
     }
 
+    public Object getTarget() {
+        return target;
+    }
+
+    public double getStrength() {
+        return strength;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
