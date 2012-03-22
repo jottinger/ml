@@ -15,10 +15,7 @@
  */
 package com.enigmastation.ml.perceptron.impl;
 
-import com.enigmastation.ml.perceptron.Layer;
-import com.enigmastation.ml.perceptron.Perceptron;
-import com.enigmastation.ml.perceptron.PerceptronRepository;
-import com.enigmastation.ml.perceptron.PerceptronResult;
+import com.enigmastation.ml.perceptron.*;
 import com.enigmastation.ml.perceptron.annotations.NeuralNetwork;
 import com.enigmastation.ml.tokenizer.Tokenizer;
 import com.enigmastation.ml.tokenizer.impl.SimpleTokenizer;
@@ -47,74 +44,72 @@ public class PerceptronImpl implements Perceptron {
         return state;
     }
 
-    @Override
-    public List<Double> feedForward(PerceptronState state) {
-        for (int i = 0; i < state.wordIds.size(); i++) {
-            state.ai.set(i, 1.0);
+    protected List<Double> feedForward(PerceptronState state) {
+        for (int i = 0; i < state.getWordIdsSize(); i++) {
+            state.setAi(i, 1.0);
         }
-        for (int j = 0; j < state.hiddenIds.size(); j++) {
+        for (int j = 0; j < state.getHiddenIdsSize(); j++) {
             double sum = 0.0;
-            for (int i = 0; i < state.wordIds.size(); i++) {
-                sum += state.ai.get(i) * state.wi.get(state.hiddenIds.get(j)).get(state.wordIds.get(i));
+            for (int i = 0; i < state.getWordIdsSize(); i++) {
+                sum += state.getAi(i) * state.getWi(j, i);
             }
-            state.ah.set(j, Math.tanh(sum));
+            state.setAh(j, Math.tanh(sum));
         }
-        for (int k = 0; k < state.targetIds.size(); k++) {
+        for (int k = 0; k < state.getTargetIdsSize(); k++) {
             double sum = 0.0;
-            for (int j = 0; j < state.hiddenIds.size(); j++) {
-                double v = state.wo.get(state.targetIds.get(k)).get(state.hiddenIds.get(j));
-                sum += state.ah.get(j) * v;
+            for (int j = 0; j < state.getHiddenIdsSize(); j++) {
+                double v = state.getWo(k, j);
+                sum += state.getAh(j) * v;
             }
-            state.ao.set(k, Math.tanh(sum));
+            state.setAo(k, Math.tanh(sum));
         }
-        return state.ao;
+        return state.getAo();
     }
 
     void backPropagate(PerceptronState state, Object target) {
         backPropagate(state, target, 0.5);
     }
 
-    @Override
     public void backPropagate(PerceptronState state, Object target, double n) {
         // we need to set the output weights to create the delta
-        double target_weights[] = new double[state.targets.size()];
-        target_weights[state.targets.indexOf(target)] = 1.0;
+        double target_weights[] = new double[state.getTargetIdsSize()];
+        target_weights[state.indexOfTarget(target)] = 1.0;
 
         // calculate errors for output
-        double output_deltas[] = new double[state.targets.size()];
-        for (int k = 0; k < state.targets.size(); k++) {
-            double error = target_weights[k] - state.ao.get(k);
-            output_deltas[k] = dtanh(state.ao.get(k)) * error;
+        double output_deltas[] = new double[state.getTargetIdsSize()];
+        for (int k = 0; k < state.getTargetIdsSize(); k++) {
+            double error = target_weights[k] - state.getAo(k);
+            output_deltas[k] = dtanh(state.getAo(k)) * error;
         }
 
         // calculate errors for hidden layer
-        double hidden_deltas[] = new double[state.hiddenIds.size()];
-        for (int j = 0; j < state.hiddenIds.size(); j++) {
+        double hidden_deltas[] = new double[state.getHiddenIdsSize()];
+        for (int j = 0; j < state.getHiddenIdsSize(); j++) {
             // j is an index to an id...
             double error = 0.0;
-            for (int k = 0; k < state.targetIds.size(); k++) {
-                error += output_deltas[k] * state.wo.get(state.targetIds.get(k)).get(state.hiddenIds.get(j));
+            for (int k = 0; k < state.getTargetIdsSize(); k++) {
+                error += output_deltas[k] * state.getWo(k, j);
             }
-            hidden_deltas[j] = dtanh(state.ah.get(j)) * error;
+            hidden_deltas[j] = dtanh(state.getAh(j)) * error;
         }
         // update output weights
-        for (int j = 0; j < state.hiddenIds.size(); j++) {
-            for (int k = 0; k < state.targetIds.size(); k++) {
-                double change = output_deltas[k] * state.ah.get(j);
-                Map<Integer, Double> m = state.wo.get(state.targetIds.get(k));
-                double v = m.get(state.hiddenIds.get(j));
+        for (int j = 0; j < state.getHiddenIdsSize(); j++) {
+            for (int k = 0; k < state.getTargetIdsSize(); k++) {
+                double change = output_deltas[k] * state.getAh(j);
+                Map<Integer, Double> m = state.getWo(k);//.get(state.targetIds.get(k));
+                double v = m.get(state.getHiddenId(j));
 
-                m.put(state.hiddenIds.get(j), v + n * change);
+                m.put(state.getHiddenId(j), v + n * change);
             }
         }
         // update input weights        
-        for (int i = 0; i < state.wordIds.size(); i++) {
-            for (int j = 0; j < state.hiddenIds.size(); j++) {
-                double change = hidden_deltas[j] * state.ai.get(i);
-                Map<Integer, Double> m = state.wi.get(state.hiddenIds.get(j));
-                double v = m.get(state.wordIds.get(i));
+        for (int i = 0; i < state.getWordIdsSize(); i++) {
+            for (int j = 0; j < state.getHiddenIdsSize(); j++) {
+                double change = hidden_deltas[j] * state.getAi(i);
+                Map<Integer, Double> m = state.getWi(j);//.get(state.hiddenIds.get(j));
+                double v = m.get(state.getWordId(i));
 
-                m.put(state.wordIds.get(i), v + n * change);
+                m.put(state.getWordId(i), v + n * change);
             }
         }
     }
@@ -132,7 +127,7 @@ public class PerceptronImpl implements Perceptron {
         Queue<PerceptronResult> queue = new PriorityQueue<>();
         PerceptronState state = buildPerceptron(corpus, targets);
         List<Double> results = feedForward(state);
-        for (int j = 0; j < state.targetIds.size(); j++) {
+        for (int j = 0; j < state.getTargetIdsSize(); j++) {
             queue.add(new PerceptronResult(targets.get(j), results.get(j)));
         }
         return queue;
@@ -184,14 +179,14 @@ public class PerceptronImpl implements Perceptron {
     }
 
     private void updateStrengths(PerceptronState state) {
-        for (Integer i : state.wordIds) {
-            for (Integer j : state.hiddenIds) {
-                repository.setStrength(i, j, Layer.HIDDEN, state.wi.get(j).get(i));
+        for (Integer i : state.getWordIds()) {
+            for (Integer j : state.getHiddenIds()) {
+                repository.setStrength(i, j, Layer.HIDDEN, state.getWiById(j, i));
             }
         }
-        for (Integer j : state.hiddenIds) {
-            for (Integer k : state.targetIds) {
-                repository.setStrength(j, k, Layer.TO, state.wo.get(k).get(j));
+        for (Integer j : state.getHiddenIds()) {
+            for (Integer k : state.getTargetIds()) {
+                repository.setStrength(j, k, Layer.TO, state.getWoById(k, j));
             }
         }
     }

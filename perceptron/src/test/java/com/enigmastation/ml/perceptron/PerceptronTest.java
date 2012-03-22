@@ -16,9 +16,7 @@
 package com.enigmastation.ml.perceptron;
 
 import com.enigmastation.ml.perceptron.impl.HSQLDBPerceptronRepository;
-import com.enigmastation.ml.perceptron.impl.NodeCreation;
 import com.enigmastation.ml.perceptron.impl.PerceptronImpl;
-import com.enigmastation.ml.perceptron.impl.PerceptronState;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -54,7 +52,7 @@ public class PerceptronTest {
 
     @Test(dataProvider = "getTokenData")
     public void createRepository(String token, Layer layer, int expectedResult, String message) {
-        assertEquals(repo.getNodeId(token, layer, NodeCreation.CREATE),
+        assertEquals(repo.getNodeId(token, layer, PerceptronRepository.NodeCreation.CREATE),
                 expectedResult, message);
     }
 
@@ -68,16 +66,6 @@ public class PerceptronTest {
         targets.add("river");
         targets.add("earth");
         repo.generateHiddenNodes(words, targets);
-    }
-
-    @Test
-    public void testOutputs() {
-        Perceptron perceptron = new PerceptronImpl(repo);
-        List<Object> words = Arrays.asList(new Object[]{"world", "bank"});
-        List<Object> targets = Arrays.asList(new Object[]{"worldbank", "river", "earth"});
-        PerceptronState state = perceptron.buildPerceptron(words, targets);
-        System.out.println(perceptron.feedForward(state));
-        System.out.flush();
     }
 
     @Test

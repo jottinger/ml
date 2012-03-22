@@ -16,7 +16,7 @@
 
 package com.enigmastation.ml.perceptron;
 
-public class PerceptronResult implements Comparable<PerceptronResult> {
+public final class PerceptronResult implements Comparable<PerceptronResult> {
     Object target;
     double strength;
 

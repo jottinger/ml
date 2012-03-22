@@ -28,16 +28,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is a repository for the perceptron that does internal resource pooling,
+ * and is customized for use with HSQLDB.
+ * <p/>
+ * This can be generified, I think. It can also be changed to use a datasource
+ * provider from JNDI.
+ */
 public class HSQLDBPerceptronRepository implements PerceptronRepository {
     final static int DEFAULT_ID = -1;
 
     public void clear() {
-        Connection conn = getConnection();
-        try {
+        try (Connection conn = getConnection()) {
             conn.prepareStatement("drop table node").execute();
             conn.prepareStatement("drop table wordhidden").execute();
             conn.prepareStatement("drop table hiddenword").execute();
-            conn.close();
             buildTables();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -47,8 +52,11 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     static {
         GenericObjectPool connectionPool = new GenericObjectPool(null);
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory("jdbc:hsqldb:file:perceptron", "SA", "");
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
+        ConnectionFactory connectionFactory =
+                new DriverManagerConnectionFactory("jdbc:hsqldb:file:perceptron", "SA", "");
+        @SuppressWarnings("UnusedDeclaration")
+        PoolableConnectionFactory poolableConnectionFactory =
+                new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
         PoolingDriver driver = new PoolingDriver();
         driver.registerPool("perceptron", connectionPool);
     }
@@ -58,10 +66,8 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     }
 
     private void buildTables() {
-        Connection conn;
         PreparedStatement ps;
-        conn = getConnection();
-        try {
+        try (Connection conn = getConnection()) {
             List<String> tables = new ArrayList<>();
             ResultSet rs = conn.getMetaData().getTables(null, null, null, null);
             while (rs.next()) {
@@ -92,11 +98,9 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     @Override
     public int getNodeId(Object token, Layer layer, NodeCreation creation) {
         int id = DEFAULT_ID;
-        Connection conn;
         PreparedStatement ps;
         ResultSet rs;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection()) {
             ps = conn.prepareStatement("select id from node where create_key=? and layer=?");
             ps.setString(1, token.toString());
             ps.setInt(2, layer.ordinal());
@@ -112,7 +116,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             }
             rs.close();
             ps.close();
-            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -121,11 +124,9 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     private int createNode(Object token, Layer layer) {
         int id;
-        Connection conn;
         PreparedStatement ps;
         ResultSet rs;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection()) {
             ps = conn.prepareStatement("insert into node (create_key, layer) values (?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, token.toString());
@@ -136,7 +137,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             id = rs.getInt(1);
             rs.close();
             ps.close();
-            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -145,8 +145,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     @Override
     public void generateHiddenNodes(List<Object> corpus, List<Object> targets) {
-        Connection conn;
-        PreparedStatement ps;
         StringBuilder sb = new StringBuilder();
         for (Object o : corpus) {
             sb.append(":").append(o.toString());
@@ -179,12 +177,10 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     @Override
     public double getStrength(int from, int to, Layer layer) {
         double strength = layer.getStrength();
-        Connection conn;
         PreparedStatement ps;
         ResultSet rs;
 
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection()) {
             ps = conn.prepareStatement("select strength from " + layer.getTableName() +
                     " where fromid=? and toid=?");
             ps.setInt(1, from);
@@ -195,7 +191,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             }
             rs.close();
             ps.close();
-            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -205,11 +200,9 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     @Override
     public List<Integer> getAllHiddenIds(List<Object> corpus, List<Object> targets) {
         List<Integer> hiddenIds = new ArrayList<>();
-        Connection conn;
         PreparedStatement ps;
         ResultSet rs;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection()) {
             ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getTableName()
                     + " where fromid=?");
             for (Object c : corpus) {
@@ -233,7 +226,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
                 rs.close();
             }
             ps.close();
-            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -242,11 +234,9 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     @Override
     public void setStrength(int from, int to, Layer layer, double strength) {
-        Connection conn;
         PreparedStatement ps;
         ResultSet rs;
-        try {
-            conn = getConnection();
+        try (Connection conn = getConnection()) {
             ps = conn.prepareStatement("select id from " + layer.getTableName()
                     + " where fromid=? and toid=?");
             ps.setInt(1, from);
@@ -275,7 +265,6 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
                 ps.executeUpdate();
             }
             ps.close();
-            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
