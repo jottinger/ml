@@ -24,11 +24,6 @@
             <version>${testngVersion}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.stephenc.high-scale-lib</groupId>
-            <artifactId>high-scale-lib</artifactId>
-            <version>1.1.4</version>
-        </dependency>
     </dependencies>
 
     <build>
