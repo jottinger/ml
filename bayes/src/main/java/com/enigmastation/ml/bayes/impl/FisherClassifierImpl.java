@@ -17,6 +17,7 @@
 package com.enigmastation.ml.bayes.impl;
 
 import com.enigmastation.ml.bayes.ClassifierDataFactory;
+import com.enigmastation.ml.bayes.FisherClassifier;
 import com.enigmastation.ml.bayes.annotations.BayesClassifier;
 import com.enigmastation.ml.bayes.annotations.FisherBayesClassifier;
 
@@ -26,9 +27,17 @@ import java.util.Map;
 
 @BayesClassifier
 @FisherBayesClassifier
-public class FisherClassifier extends SimpleClassifier {
+public class FisherClassifierImpl extends SimpleClassifierImpl implements FisherClassifier {
     Map<Object, Double> minimums = new HashMap<>();
 
+    /**
+     * This accesses the current minimum strength for the category. If the probability of a
+     * classification operation is less than this strength for this category, the result is discarded.
+     *
+     * @param category The category for which to acquire the minimum strength
+     * @return the strength
+     */
+    @Override
     public double getMinimum(Object category) {
         if (minimums.containsKey(category)) {
             return minimums.get(category);
@@ -37,18 +46,32 @@ public class FisherClassifier extends SimpleClassifier {
         }
     }
 
-    public void setMinimum(Object category, double v) {
-        minimums.put(category, v);
+    /**
+     * This sets the minimum strength required for the supplied category to be considered as a
+     * classification result. If the classification operation yields a weaker probability than
+     * this strength, the result is ignored.
+     * <p/>
+     * The result of this is that you are able to say "classify as category 'x' but only if 'x'
+     * is very likely," for example.
+     *
+     * @param category the category for which the strength is mutated
+     * @param strength the minimum probability to accept for this category
+     */
+    @Override
+    public void setMinimum(Object category, double strength) {
+        minimums.put(category, strength);
     }
 
-    public FisherClassifier() {
+    public FisherClassifierImpl() {
+        super();
     }
 
-    public FisherClassifier(ClassifierDataFactory factory) {
+    public FisherClassifierImpl(ClassifierDataFactory factory) {
         super(factory);
     }
 
-    double featureProb(Object feature, Object category) {
+    @Override
+    protected double featureProb(Object feature, Object category) {
         double clf = super.featureProb(feature, category);
         if (clf == 0.0) {
             return 0.0;
@@ -60,7 +83,7 @@ public class FisherClassifier extends SimpleClassifier {
         return clf / frequencySum;
     }
 
-    double fisherProbability(Object source, Object category) {
+    private double fisherProbability(Object source, Object category) {
         double p = 1.0;
         List<Object> features = getFeatures(source);
         for (Object f : features) {
@@ -81,6 +104,14 @@ public class FisherClassifier extends SimpleClassifier {
         return Math.min(sum, 1.0);
     }
 
+    /**
+     * This returns the best-match classification from the bayesian engine if
+     * and only if the classification is more probable than the default thresholds
+     * for classification.
+     *
+     * @param source the source corpus for the classification operation
+     * @return the best-match classification
+     */
     @Override
     public Object classify(Object source, Object defaultClassification) {
         Object best = defaultClassification;

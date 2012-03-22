@@ -16,9 +16,9 @@
 
 package com.enigmastation.ml.bayes.impl;
 
-import com.enigmastation.ml.bayes.Classifier;
 import com.enigmastation.ml.bayes.ClassifierDataFactory;
 import com.enigmastation.ml.bayes.Feature;
+import com.enigmastation.ml.bayes.SimpleClassifier;
 import com.enigmastation.ml.bayes.annotations.BayesClassifier;
 import com.enigmastation.ml.bayes.annotations.NaiveBayesClassifier;
 import com.enigmastation.ml.tokenizer.Tokenizer;
@@ -30,35 +30,82 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This is a simple (naive) bayesian classifier.
+ */
 @BayesClassifier
 @NaiveBayesClassifier
-public class SimpleClassifier implements Classifier {
-    Cache<Object, Feature> features;
-    Cache<Object, Integer> categories;
-    Tokenizer tokenizer = new PorterTokenizer();
-    Map<Object, Double> thresholds = new HashMap<>();
-    static final ThreadLocal<Object> lastData = new ThreadLocal<>();
-    static final ThreadLocal<List<Object>> lastFeatures = new ThreadLocal<>();
+public class SimpleClassifierImpl implements SimpleClassifier {
+    protected Cache<Object, Feature> features;
+    protected Cache<Object, Integer> categories;
+    protected Tokenizer tokenizer = new PorterTokenizer();
+    protected Map<Object, Double> thresholds = new HashMap<>();
+    private static final ThreadLocal<Object> lastData = new ThreadLocal<>();
+    private static final ThreadLocal<List<Object>> lastFeatures = new ThreadLocal<>();
 
-    SimpleClassifier(ClassifierDataFactory factory) {
+    /**
+     * This constructor uses the supplied ClassifierDataFactory as a backing store.
+     *
+     * @param factory The ClassifierDataFactory to use
+     */
+    SimpleClassifierImpl(ClassifierDataFactory factory) {
         features = factory.buildFeatures();
         categories = factory.buildCategories();
     }
 
-    public SimpleClassifier() {
+    /**
+     * This constructor uses the default classifier data factory (oddly enough,
+     * the class name is "DefaultClassifierDataFactory".)
+     */
+    public SimpleClassifierImpl() {
         this(new DefaultClassifierDataFactory());
     }
 
+    /**
+     * This returns the best-match classification from the bayesian engine.
+     * The default classification is "none", which will be returned if
+     * no other classification matches.
+     *
+     * @param source the source corpus for the classification operation
+     * @return the best-match classification
+     */
     @Override
     public Object classify(Object source) {
         return classify(source, "none");
     }
 
+    /**
+     * This returns the best-match classification from the bayesian engine if
+     * and only if the classification is more probable than the default threshold
+     * for classification.
+     * <p/>
+     * The default threshold is normally 0.0, which means the default classification
+     * will be used only if no match at all is found with this method.
+     * <p/>
+     * As a result, it probably shouldn't be used. You should prefer
+     * classify(Object, Object, double) instead.
+     *
+     * @param source the source corpus for the classification operation
+     * @return the best-match classification
+     */
     @Override
     public Object classify(Object source, Object defaultClassification) {
         return classify(source, defaultClassification, 0.0);
     }
 
+    /**
+     * This returns the best-match classification from the bayesian engine if
+     * and only if the classification is more probable than the strength threshold.
+     * <p/>
+     * If the best-match classification is less probable than the threshold,
+     * the default classification is returned.
+     *
+     * @param source                the source corpus for the classification operation
+     * @param defaultClassification the default classification if the best-match
+     *                              is less strong than strength
+     * @param strength              the strength threshold for the best-match
+     * @return the best-match or default classification
+     */
     @Override
     public Object classify(Object source, Object defaultClassification, double strength) {
         Map<Object, Double> probabilities = getClassificationProbabilities(source);
@@ -82,6 +129,14 @@ public class SimpleClassifier implements Classifier {
         return category;
     }
 
+    /**
+     * This method returns the raw classification data, as a map. The map contains
+     * the classification as a key, which maps to the classification's strength.
+     *
+     * @param source the source corpus for the classification operation
+     * @return A Map where the key is the classification category and the value
+     *         is the strength of that category
+     */
     @Override
     public Map<Object, Double> getClassificationProbabilities(Object source) {
         Map<Object, Double> probabilities = new HashMap<>();
@@ -91,6 +146,12 @@ public class SimpleClassifier implements Classifier {
         return probabilities;
     }
 
+    /**
+     * This method trains the classifier.
+     *
+     * @param source         The source text for the training operation
+     * @param classification The classification for which to train
+     */
     @Override
     public void train(Object source, Object classification) {
         List<Object> features = getFeatures(source);
@@ -100,6 +161,13 @@ public class SimpleClassifier implements Classifier {
         incrementCategory(classification);
     }
 
+    /**
+     * This method returns the tokenized features for a given source object.
+     * It caches the data in a ThreadLocal, which may yield performance enhancements.
+     *
+     * @param source The source to tokenize
+     * @return The tokenized source
+     */
     protected List<Object> getFeatures(Object source) {
         List<Object> features;
         if (source.equals(lastData.get())) {
@@ -121,11 +189,6 @@ public class SimpleClassifier implements Classifier {
         }
         features.put(feature, f);
         f.incrementCategoryCount(category);
-        /*
-        Map<Object, Integer> cat = features.get(feature);
-        features.put(feature, cat);
-        cat.put(category, cat.get(category) + 1);
-        */
     }
 
     private void incrementCategory(Object category) {
@@ -137,10 +200,7 @@ public class SimpleClassifier implements Classifier {
     }
 
     // the number of times a feature has occurred in a category
-    int featureCount(Object feature, Object category) {
-        //if (features.containsKey(feature) && features.get(feature).containsKey(category)) {
-        //  return features.get(feature).get(category);
-        //}
+    private int featureCount(Object feature, Object category) {
         Feature f = features.get(feature);
         if (f == null) {
             return 0;
@@ -148,14 +208,14 @@ public class SimpleClassifier implements Classifier {
         return f.getCountForCategory(category);
     }
 
-    int categoryCount(Object category) {
+    private int categoryCount(Object category) {
         if (categories.containsKey(category)) {
             return categories.get(category);
         }
         return 0;
     }
 
-    int totalCount() {
+    private int totalCount() {
         int sum = 0;
         for (Integer i : categories.values()) {
             sum += i;
@@ -163,39 +223,37 @@ public class SimpleClassifier implements Classifier {
         return sum;
     }
 
-    Set<Object> categories() {
+    protected Set<Object> categories() {
         return categories.keySet();
     }
 
-    double featureProb(Object feature, Object category) {
+    protected double featureProb(Object feature, Object category) {
         if (categoryCount(category) == 0) {
             return 0.0;
         }
         return (1.0 * featureCount(feature, category)) / categoryCount(category);
     }
 
-    double weightedProb(Object feature, Object category, double weight, double assumedProbability) {
+    private double weightedProb(Object feature, Object category, double weight, double assumedProbability) {
         double basicProbability = featureProb(feature, category);
-        //System.out.println("basic probability: "+basicProbability);
+
         double totals = 0;
         for (Object cat : categories()) {
             totals += featureCount(feature, cat);
         }
-        //System.out.printf("((%f * %f)+(%f * %f))/(%f + %f) %n", weight,
-        //assumedProbability, totals, basicProbability, weight, totals);
         return ((weight * assumedProbability) + (totals * basicProbability)) / (weight + totals);
     }
 
-    double weightedProb(Object feature, Object category, double weight) {
+    private double weightedProb(Object feature, Object category, double weight) {
         return weightedProb(feature, category, weight, 0.5);
     }
 
-    double weightedProb(Object feature, Object category) {
+    protected double weightedProb(Object feature, Object category) {
         return weightedProb(feature, category, 1.0);
     }
 
     /* naive bayes, very naive - and not what we usually need. */
-    double documentProbability(Object source, Object category) {
+    private double documentProbability(Object source, Object category) {
         List<Object> features = getFeatures(source);
         double p = 1.0;
         for (Object f : features) {
@@ -204,16 +262,31 @@ public class SimpleClassifier implements Classifier {
         return p;
     }
 
-    double prob(Object corpus, Object category) {
+    private double prob(Object corpus, Object category) {
         double categoryProbability = (1.0 * categoryCount(category)) / totalCount();
         double documentProbability = documentProbability(corpus, category);
         return documentProbability * categoryProbability;
     }
 
+    /**
+     * This sets the minimum threshold for a given category. If the classification operation
+     * yields less probability than this threshold, the result is discarded.
+     *
+     * @param category  The category for which to set the threshold
+     * @param threshold the minimum threshold
+     */
+    @Override
     public void setThreshold(Object category, Double threshold) {
         thresholds.put(category, threshold);
     }
 
+    /**
+     * This method returns the minimum threshold considered for this category.
+     *
+     * @param category The category for which to set the minimum strength
+     * @return the strength associated with the category
+     */
+    @Override
     public double getThreshold(Object category) {
         if (thresholds.containsKey(category)) {
             return thresholds.get(category);
