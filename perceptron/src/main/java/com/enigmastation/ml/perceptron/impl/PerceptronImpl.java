@@ -15,7 +15,10 @@
  */
 package com.enigmastation.ml.perceptron.impl;
 
-import com.enigmastation.ml.perceptron.*;
+import com.enigmastation.ml.perceptron.Perceptron;
+import com.enigmastation.ml.perceptron.PerceptronRepository;
+import com.enigmastation.ml.perceptron.PerceptronResult;
+import com.enigmastation.ml.perceptron.PerceptronState;
 import com.enigmastation.ml.perceptron.annotations.NeuralNetwork;
 import com.enigmastation.ml.tokenizer.Tokenizer;
 import com.enigmastation.ml.tokenizer.impl.SimpleTokenizer;
@@ -181,12 +184,12 @@ public class PerceptronImpl implements Perceptron {
     private void updateStrengths(PerceptronState state) {
         for (Integer i : state.getWordIds()) {
             for (Integer j : state.getHiddenIds()) {
-                repository.setStrength(i, j, Layer.HIDDEN, state.getWiById(j, i));
+                repository.setStrength(i, j, PerceptronRepository.Layer.HIDDEN, state.getWiById(j, i));
             }
         }
         for (Integer j : state.getHiddenIds()) {
             for (Integer k : state.getTargetIds()) {
-                repository.setStrength(j, k, Layer.TO, state.getWoById(k, j));
+                repository.setStrength(j, k, PerceptronRepository.Layer.TO, state.getWoById(k, j));
             }
         }
     }

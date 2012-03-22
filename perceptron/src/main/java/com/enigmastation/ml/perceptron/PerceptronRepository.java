@@ -44,4 +44,35 @@ public interface PerceptronRepository {
         CREATE,
         NO_CREATE
     }
+
+    /**
+     * This enum specifies the layer of the neuron, along with default strengths for that
+     * layer (as well as potential namespaces for the layer.)
+     */
+    enum Layer {
+        FROM,
+        HIDDEN("wordhidden", -0.2),
+        TO("hiddenword", 0.0);
+        String storeName;
+        double strength = 0.0;
+
+        Layer() {
+        }
+
+        Layer(String tableName, double strength) {
+            this.storeName = tableName;
+            this.strength = strength;
+        }
+
+        public double getStrength() {
+            return strength;
+        }
+
+        public String getStoreName() {
+            if (storeName == null) {
+                throw new IllegalArgumentException("storeName not implemented for layer " + this);
+            }
+            return storeName;
+        }
+    }
 }

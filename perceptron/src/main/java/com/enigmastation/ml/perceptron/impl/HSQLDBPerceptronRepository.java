@@ -16,7 +16,6 @@
 
 package com.enigmastation.ml.perceptron.impl;
 
-import com.enigmastation.ml.perceptron.Layer;
 import com.enigmastation.ml.perceptron.PerceptronRepository;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -78,12 +77,12 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
                         .execute();
             }
             if (!tables.contains("wordhidden")) {
-                conn.prepareStatement("create table " + Layer.HIDDEN.getTableName()
+                conn.prepareStatement("create table " + Layer.HIDDEN.getStoreName()
                         + " (id bigint identity, fromid bigint, toid bigint, strength double)")
                         .execute();
             }
             if (!tables.contains("hiddenword")) {
-                conn.prepareStatement("create table " + Layer.TO.getTableName()
+                conn.prepareStatement("create table " + Layer.TO.getStoreName()
                         + " (id bigint identity, fromid bigint, toid bigint, strength double)")
                         .execute();
             }
@@ -181,7 +180,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         ResultSet rs;
 
         try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select strength from " + layer.getTableName() +
+            ps = conn.prepareStatement("select strength from " + layer.getStoreName() +
                     " where fromid=? and toid=?");
             ps.setInt(1, from);
             ps.setInt(2, to);
@@ -203,7 +202,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         PreparedStatement ps;
         ResultSet rs;
         try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getTableName()
+            ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getStoreName()
                     + " where fromid=?");
             for (Object c : corpus) {
                 ps.setInt(1, getNodeId(c, Layer.FROM, NodeCreation.CREATE));
@@ -215,7 +214,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             }
             ps.close();
 
-            ps = conn.prepareStatement("select fromid from " + Layer.TO.getTableName()
+            ps = conn.prepareStatement("select fromid from " + Layer.TO.getStoreName()
                     + " where toid=?");
             for (Object c : corpus) {
                 ps.setInt(1, getNodeId(c, Layer.TO, NodeCreation.CREATE));
@@ -237,7 +236,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         PreparedStatement ps;
         ResultSet rs;
         try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select id from " + layer.getTableName()
+            ps = conn.prepareStatement("select id from " + layer.getStoreName()
                     + " where fromid=? and toid=?");
             ps.setInt(1, from);
             ps.setInt(2, to);
@@ -247,7 +246,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
                 int id = rs.getInt(1);
                 rs.close();
                 ps.close();
-                ps = conn.prepareStatement("update " + layer.getTableName()
+                ps = conn.prepareStatement("update " + layer.getStoreName()
                         + " set strength=? where id=?");
                 ps.setDouble(1, strength);
                 ps.setInt(2, id);
@@ -256,7 +255,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
                 rs.close();
                 ps.close();
                 // insert
-                ps = conn.prepareStatement("insert into " + layer.getTableName() +
+                ps = conn.prepareStatement("insert into " + layer.getStoreName() +
                         " (fromid, toid, strength) " +
                         " values (?, ?, ?)");
                 ps.setInt(1, from);

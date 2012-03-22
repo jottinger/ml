@@ -46,10 +46,10 @@ public final class PerceptronState {
 
     public void setupNetwork(PerceptronRepository repository) {
         for (Object o : corpus) {
-            wordIds.add(repository.getNodeId(o, Layer.FROM, PerceptronRepository.NodeCreation.CREATE));
+            wordIds.add(repository.getNodeId(o, PerceptronRepository.Layer.FROM, PerceptronRepository.NodeCreation.CREATE));
         }
         for (Object o : targets) {
-            targetIds.add(repository.getNodeId(o, Layer.TO, PerceptronRepository.NodeCreation.CREATE));
+            targetIds.add(repository.getNodeId(o, PerceptronRepository.Layer.TO, PerceptronRepository.NodeCreation.CREATE));
         }
         hiddenIds.addAll(repository.getAllHiddenIds(corpus, targets));
         for (int i : wordIds) {
@@ -65,14 +65,14 @@ public final class PerceptronState {
             Map<Integer, Double> targetMap = new HashMap<>();
             wi.put(h, targetMap);
             for (int c : wordIds) {
-                targetMap.put(c, repository.getStrength(c, h, Layer.HIDDEN));
+                targetMap.put(c, repository.getStrength(c, h, PerceptronRepository.Layer.HIDDEN));
             }
         }
         for (int t : targetIds) {
             Map<Integer, Double> targetMap = new HashMap<>();
             wo.put(t, targetMap);
             for (int h : hiddenIds) {
-                targetMap.put(h, repository.getStrength(h, t, Layer.TO));
+                targetMap.put(h, repository.getStrength(h, t, PerceptronRepository.Layer.TO));
             }
         }
     }

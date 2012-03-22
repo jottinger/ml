@@ -39,19 +39,19 @@ public class PerceptronTest {
     @DataProvider
     Object[][] getTokenData() {
         return new Object[][]{
-                new Object[]{"foo", Layer.HIDDEN, 0, "creation of foo"},
-                new Object[]{"foo", Layer.HIDDEN, 0, "verification of first read of foo"},
-                new Object[]{"bar", Layer.HIDDEN, 1, "creation of bar"},
-                new Object[]{"foo", Layer.HIDDEN, 0, "read of foo after creation of bar"},
-                new Object[]{"bar", Layer.HIDDEN, 1, "read of bar"},
-                new Object[]{"foo", Layer.TO, 2, "creation of foo in different layer"},
-                new Object[]{"foo", Layer.HIDDEN, 0, "read of foo after creation of foo in different layer"},
-                new Object[]{"foo", Layer.TO, 2, "read of foo after creation of foo in different layer"},
+                new Object[]{"foo", PerceptronRepository.Layer.HIDDEN, 0, "creation of foo"},
+                new Object[]{"foo", PerceptronRepository.Layer.HIDDEN, 0, "verification of first read of foo"},
+                new Object[]{"bar", PerceptronRepository.Layer.HIDDEN, 1, "creation of bar"},
+                new Object[]{"foo", PerceptronRepository.Layer.HIDDEN, 0, "read of foo after creation of bar"},
+                new Object[]{"bar", PerceptronRepository.Layer.HIDDEN, 1, "read of bar"},
+                new Object[]{"foo", PerceptronRepository.Layer.TO, 2, "creation of foo in different layer"},
+                new Object[]{"foo", PerceptronRepository.Layer.HIDDEN, 0, "read of foo after creation of foo in different layer"},
+                new Object[]{"foo", PerceptronRepository.Layer.TO, 2, "read of foo after creation of foo in different layer"},
         };
     }
 
     @Test(dataProvider = "getTokenData")
-    public void createRepository(String token, Layer layer, int expectedResult, String message) {
+    public void createRepository(String token, PerceptronRepository.Layer layer, int expectedResult, String message) {
         assertEquals(repo.getNodeId(token, layer, PerceptronRepository.NodeCreation.CREATE),
                 expectedResult, message);
     }
