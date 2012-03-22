@@ -16,7 +16,7 @@
 
 package com.enigmastation.ml.bayes.impl;
 
-import com.enigmastation.ml.bayes.Tokenizer;
+import com.enigmastation.ml.tokenizer.Tokenizer;
 
 import java.util.List;
 

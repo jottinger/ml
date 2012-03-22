@@ -14,9 +14,9 @@
  limitations under the License.
  */
 
-package com.enigmastation.ml.bayes.impl;
+package com.enigmastation.ml.tokenizer.impl;
 
-import com.enigmastation.ml.bayes.Tokenizer;
+import com.enigmastation.ml.tokenizer.Tokenizer;
 
 import java.util.ArrayList;
 import java.util.List;

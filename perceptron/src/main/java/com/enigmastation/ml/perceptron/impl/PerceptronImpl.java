@@ -5,16 +5,16 @@ import com.enigmastation.ml.perceptron.Perceptron;
 import com.enigmastation.ml.perceptron.PerceptronRepository;
 import com.enigmastation.ml.perceptron.PerceptronResult;
 import com.enigmastation.ml.perceptron.annotations.NeuralNetwork;
+import com.enigmastation.ml.tokenizer.Tokenizer;
+import com.enigmastation.ml.tokenizer.impl.SimpleTokenizer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 
 @com.enigmastation.ml.perceptron.annotations.Perceptron
 @NeuralNetwork
 public class PerceptronImpl implements Perceptron {
     PerceptronRepository repository;
+    Tokenizer tokenizer = new SimpleTokenizer();
 
     private double dtanh(double y) {
         return 1.0 - y * y;
@@ -113,7 +113,7 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public Queue<PerceptronResult> getResult(List<Object> corpus, List<Object> targets) {
+    public Queue<PerceptronResult> getResults(List<Object> corpus, List<Object> targets) {
         Queue<PerceptronResult> queue = new PriorityQueue<>();
         PerceptronState state = buildPerceptron(corpus, targets);
         List<Double> results = feedForward(state);
@@ -121,6 +121,51 @@ public class PerceptronImpl implements Perceptron {
             queue.add(new PerceptronResult(targets.get(j), results.get(j)));
         }
         return queue;
+    }
+
+    @Override
+    public Queue<PerceptronResult> getResults(Object corpus, List<Object> targets) {
+        return getResults(tokenizer.tokenize(corpus), targets);
+    }
+
+    @Override
+    public Queue<PerceptronResult> getResults(Object corpus, Object[] targets) {
+        return getResults(corpus, Arrays.asList(targets));
+    }
+
+    @Override
+    public Object getFirstResult(List<Object> corpus, List<Object> targets) {
+        return getResults(corpus, targets).peek().getTarget();
+    }
+
+    @Override
+    public Object getFirstResult(Object corpus, List<Object> targets) {
+        return getFirstResult(tokenizer.tokenize(corpus), targets);
+    }
+
+    @Override
+    public Object getFirstResult(Object corpus, Object[] targets) {
+        return getFirstResult(corpus, Arrays.asList(targets));
+    }
+
+    @Override
+    public void train(Object corpus, List<Object> targets, Object selected) {
+        train(tokenizer.tokenize(corpus), targets, selected);
+    }
+
+    @Override
+    public void train(Object corpus, Object[] targets, Object selected) {
+        train(corpus, Arrays.asList(targets), selected);
+    }
+
+    @Override
+    public Tokenizer getTokenizer() {
+        return tokenizer;
+    }
+
+    @Override
+    public void setTokenizer(Tokenizer tokenizer) {
+        this.tokenizer = tokenizer;
     }
 
     private void updateStrengths(PerceptronState state) {

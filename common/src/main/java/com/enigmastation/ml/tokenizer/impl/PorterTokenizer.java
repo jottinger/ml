@@ -14,9 +14,9 @@
  limitations under the License.
  */
 
-package com.enigmastation.ml.bayes.impl;
+package com.enigmastation.ml.tokenizer.impl;
 
-import com.enigmastation.ml.bayes.Tokenizer;
+import com.enigmastation.ml.tokenizer.Tokenizer;
 import org.apache.lucene.analysis.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;

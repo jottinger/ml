@@ -24,6 +24,12 @@
             <version>${testngVersion}</version>
             <scope>test</scope>
         </dependency>
+        <!-- runtime dependencies -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers</artifactId>
+            <version>${luceneVersion}</version>
+        </dependency>
     </dependencies>
 
     <build>

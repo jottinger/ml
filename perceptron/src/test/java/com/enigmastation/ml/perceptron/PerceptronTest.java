@@ -83,13 +83,13 @@ public class PerceptronTest {
     @Test
     public void testTrain() {
         Perceptron perceptron = new PerceptronImpl(repo);
-        System.out.println(perceptron.getResult(Arrays.asList(new Object[]{"world", "bank"}),
+        System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"world", "bank"}),
                 Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
         );
         perceptron.train(Arrays.asList(new Object[]{"world", "bank"}),
                 Arrays.asList(new Object[]{"worldbank", "river", "earth"}),
                 "worldbank");
-        System.out.println(perceptron.getResult(Arrays.asList(new Object[]{"world", "bank"}),
+        System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"world", "bank"}),
                 Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
         );
     }
@@ -98,6 +98,7 @@ public class PerceptronTest {
     public void testUnseenResult() {
         Object[] allTargets = new Object[]{"worldbank", "river", "earth"};
         Perceptron perceptron = new PerceptronImpl(repo);
+        //noinspection UnusedDeclaration
         for (int i : range(1, 30)) {
             perceptron.train(Arrays.asList(new Object[]{"world", "bank"}),
                     Arrays.asList(allTargets), "worldbank");
@@ -106,13 +107,13 @@ public class PerceptronTest {
             perceptron.train(Arrays.asList(new Object[]{"world"}),
                     Arrays.asList(allTargets), "earth");
         }
-        System.out.println(perceptron.getResult(
+        System.out.println(perceptron.getResults(
                 Arrays.asList(new Object[]{"world", "bank"}),
                 Arrays.asList(allTargets)));
-        System.out.println(perceptron.getResult(
+        System.out.println(perceptron.getResults(
                 Arrays.asList(new Object[]{"river", "bank"}),
                 Arrays.asList(allTargets)));
-        System.out.println(perceptron.getResult(
+        System.out.println(perceptron.getResults(
                 Arrays.asList(new Object[]{"bank"}),
                 Arrays.asList(allTargets)));
 
@@ -127,14 +128,35 @@ public class PerceptronTest {
                 new String[]{"1false nand 2true", "true"},
         };
         Perceptron perceptron = new PerceptronImpl(repo);
+        //noinspection UnusedDeclaration
         for (int i : range(1, 30)) {
             for (String[] data : trainingSet) {
                 Object[] inputs = data[0].split(" ");
                 perceptron.train(Arrays.asList(inputs), targets, data[1]);
             }
         }
-        System.out.println(perceptron.getResult(
+        System.out.println(perceptron.getResults(
                 Arrays.asList(new Object[]{"1false", "nand", "2false"}), targets));
+    }
+
+
+    @Test
+    public void testCleanerAPI() {
+        List<Object> targets = Arrays.asList(new Object[]{"true", "false"});
+        String[][] trainingSet = new String[][]{
+                new String[]{"1true nand 2true", "false"},
+                new String[]{"1true nand 2false", "true"},
+                new String[]{"1false nand 2true", "true"},
+        };
+        Perceptron perceptron = new PerceptronImpl(repo);
+        //noinspection UnusedDeclaration
+        for (int i : range(1, 30)) {
+            for (String[] data : trainingSet) {
+                perceptron.train(data[0], targets, data[1]);
+            }
+        }
+        assertEquals(perceptron.getFirstResult("1false nand 2false", targets), "true");
+
     }
 
     private List<Integer> range(Integer start, Integer end) {

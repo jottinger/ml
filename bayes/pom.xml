@@ -25,12 +25,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- runtime dependencies -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers</artifactId>
-            <version>${luceneVersion}</version>
-        </dependency>
         <dependency>
             <groupId>${parent.groupId}</groupId>
             <artifactId>common</artifactId>

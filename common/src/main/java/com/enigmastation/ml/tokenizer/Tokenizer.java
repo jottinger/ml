@@ -14,10 +14,10 @@
  limitations under the License.
  */
 
-package com.enigmastation.ml.bayes;
+package com.enigmastation.ml.tokenizer;
 
 import java.util.List;
 
 public interface Tokenizer {
-  List<Object> tokenize(Object source);
+    List<Object> tokenize(Object source);
 }

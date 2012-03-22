@@ -51,19 +51,27 @@ PerceptronRepository repo = new HSQLDBPerceptronRepository();
 Perceptron perceptron=new PerceptronImpl(repo);
 
 // training phase
-// note: the API is likely to become much easier to use...
-// this construct is really, really ugly. I wish Java would
-// allow me to declare lists inline...
-Object[] corpusArray=new Object[]{"half", "the", "world"};
 Object[] targetArray=new Object[]{"test for echo", "counterparts"};
-List<Object> corpus=Arrays.asList(corpusArray);
-List<Object> targets=Arrays.asList(targetArray);
 
 // one provides the source text, the list of targets to consider, then
 // the actual target
-perceptron.train(corpus, targets, "test for echo");
+perceptron.train("half the world", targets, "test for echo");
 
-// getResults returns a List of PerceptronResults
-Object classification=perceptron.getResults(corpus, targets).get(0).getTarget();
+// getResults returns a Queue of PerceptronResults
+Object classification=perceptron.getFirstResult("world", targets);
 
-Again, the perceptron's API is likely to be streamlined soon.
+The Tokenizer's implications for the Perceptron
+
+The Perceptron is able to tokenize input, as shown in the API example above.
+However, the tokenizer is able to affect the input by stemming text.
+
+The default Tokenizer does not affect the text at all, but merely splits it
+along whitespace. You can change this to a PorterStemmer as follows:
+
+perceptron.setTokenizer(new PorterStemmer());
+
+Again, the tokenizers affect the input and may thus affect the output. Also note
+that if you mix the API inputs (by calling the form that expects a List<Object> to
+train and then the single-object corpus to classify) your results will not be valid,
+because "stemming," for example, will be counted as "stemming" for training and
+"stem" for classification purposes.

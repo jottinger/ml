@@ -19,9 +19,10 @@ package com.enigmastation.ml.bayes.impl;
 import com.enigmastation.ml.bayes.Classifier;
 import com.enigmastation.ml.bayes.ClassifierDataFactory;
 import com.enigmastation.ml.bayes.Feature;
-import com.enigmastation.ml.bayes.Tokenizer;
 import com.enigmastation.ml.bayes.annotations.BayesClassifier;
 import com.enigmastation.ml.bayes.annotations.NaiveBayesClassifier;
+import com.enigmastation.ml.tokenizer.Tokenizer;
+import com.enigmastation.ml.tokenizer.impl.PorterTokenizer;
 import org.infinispan.Cache;
 
 import java.util.HashMap;
