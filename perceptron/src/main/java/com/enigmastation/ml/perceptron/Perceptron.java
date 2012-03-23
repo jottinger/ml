@@ -30,6 +30,14 @@ public interface Perceptron {
 
     void train(Object corpus, List<Object> targets, Object selected);
 
+    /**
+     * Trains the perceptron for all targets given the corpus and the preferred target.
+     * Note that this method is far, far slower than the version in which targets are
+     * supplied!
+     *
+     * @param corpus   the body of tokenized text for which to train
+     * @param selected the preferred target
+     */
     void train(Object corpus, Object selected);
 
     void createTarget(Object target);
@@ -53,4 +61,6 @@ public interface Perceptron {
     Object getFirstResult(Object corpus);
 
     Queue<PerceptronResult> getResults(Object corpus);
+
+    List<Object> getAllTargets();
 }

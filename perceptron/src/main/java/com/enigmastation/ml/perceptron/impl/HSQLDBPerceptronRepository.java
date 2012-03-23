@@ -17,6 +17,7 @@
 package com.enigmastation.ml.perceptron.impl;
 
 import com.enigmastation.ml.perceptron.PerceptronRepository;
+import com.enigmastation.ml.util.LRUCache;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
@@ -25,7 +26,9 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is a repository for the perceptron that does internal resource pooling,
@@ -36,6 +39,7 @@ import java.util.List;
  */
 public class HSQLDBPerceptronRepository implements PerceptronRepository {
     final static int DEFAULT_ID = -1;
+    Map<Layer, LRUCache<String, Integer>> nodeIdCache = new HashMap<>();
 
     public void clear() {
         try (Connection conn = getConnection()) {
@@ -62,6 +66,8 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     public HSQLDBPerceptronRepository() {
         buildTables();
+        nodeIdCache.put(Layer.FROM, new LRUCache<String, Integer>(150));
+        nodeIdCache.put(Layer.TO, new LRUCache<String, Integer>(10));
     }
 
     private void buildTables() {
@@ -91,6 +97,11 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         }
     }
 
+    @Override
+    public int getNodeId(Object token, Layer layer) {
+        return getNodeId(token, layer, NodeCreation.CREATE);
+    }
+
     /*
     * This could use a cache *so* bad... assuming it's called a whole lot for the same terms.
     */
@@ -99,24 +110,36 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         int id = DEFAULT_ID;
         PreparedStatement ps;
         ResultSet rs;
-        try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select id from node where create_key=? and layer=?");
-            ps.setString(1, token.toString());
-            ps.setInt(2, layer.ordinal());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt(1);
-            } else {
-                if (creation == NodeCreation.CREATE) {
-                    rs.close();
-                    ps.close();
-                    id = createNode(token, layer);
-                }
+        // check the cache! -- but we don't cache hidden nodes.
+        if (!layer.equals(Layer.HIDDEN)) {
+            Integer nodeId = nodeIdCache.get(layer).get(token.toString());
+            if (nodeId != null) {
+                id = nodeId;
             }
-            rs.close();
-            ps.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        }
+        if (id == DEFAULT_ID) {
+            try (Connection conn = getConnection()) {
+                ps = conn.prepareStatement("select id from node where create_key=? and layer=?");
+                ps.setString(1, token.toString());
+                ps.setInt(2, layer.ordinal());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                } else {
+                    if (creation == NodeCreation.CREATE) {
+                        rs.close();
+                        ps.close();
+                        id = createNode(token, layer);
+                    }
+                }
+                rs.close();
+                ps.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (!layer.equals(Layer.HIDDEN)) {
+            nodeIdCache.get(layer).put(token.toString(), id);
         }
         return id;
     }
@@ -154,11 +177,11 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             id = createNode(sb.toString(), Layer.HIDDEN);
             // now create connections!
             for (Object token : corpus) {
-                setStrength(getNodeId(token, Layer.FROM, NodeCreation.CREATE),
+                setStrength(getNodeId(token, Layer.FROM),
                         id, Layer.HIDDEN, 1.0 / corpus.size());
             }
             for (Object token : targets) {
-                setStrength(id, getNodeId(token, Layer.TO, NodeCreation.CREATE),
+                setStrength(id, getNodeId(token, Layer.TO),
                         Layer.TO, 0.1);
             }
         }
@@ -224,7 +247,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getStoreName()
                     + " where fromid=?");
             for (Object c : corpus) {
-                ps.setInt(1, getNodeId(c, Layer.FROM, NodeCreation.CREATE));
+                ps.setInt(1, getNodeId(c, Layer.FROM));
                 rs = ps.executeQuery();
                 if (rs.next()) {
                     hiddenIds.add(rs.getInt(1));
@@ -236,7 +259,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
             ps = conn.prepareStatement("select fromid from " + Layer.TO.getStoreName()
                     + " where toid=?");
             for (Object c : corpus) {
-                ps.setInt(1, getNodeId(c, Layer.TO, NodeCreation.CREATE));
+                ps.setInt(1, getNodeId(c, Layer.TO));
                 rs = ps.executeQuery();
                 if (rs.next()) {
                     hiddenIds.add(rs.getInt(1));

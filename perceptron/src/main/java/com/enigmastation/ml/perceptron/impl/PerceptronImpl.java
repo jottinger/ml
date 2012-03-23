@@ -117,7 +117,8 @@ public class PerceptronImpl implements Perceptron {
         }
     }
 
-    List<Object> getAllTargets() {
+    @Override
+    public List<Object> getAllTargets() {
         return repository.getAllTargets();
     }
 

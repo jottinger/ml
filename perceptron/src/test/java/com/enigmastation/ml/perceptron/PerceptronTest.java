@@ -130,20 +130,22 @@ public class PerceptronTest {
 
     @Test
     public void testCleanerAPI() {
-        List<Object> targets = Arrays.asList(new Object[]{"true", "false"});
         String[][] trainingSet = new String[][]{
                 new String[]{"1true nand 2true", "false"},
                 new String[]{"1true nand 2false", "true"},
                 new String[]{"1false nand 2true", "true"},
         };
         Perceptron perceptron = new PerceptronImpl(repo);
+        perceptron.createTarget("true");
+        perceptron.createTarget("false");
+
         //noinspection UnusedDeclaration
         for (int i : range(1, 30)) {
             for (String[] data : trainingSet) {
-                perceptron.train(data[0], targets, data[1]);
+                perceptron.train(data[0], data[1]);
             }
         }
-        assertEquals(perceptron.getFirstResult("1false nand 2false", targets), "true");
+        assertEquals(perceptron.getFirstResult("1false nand 2false"), "true");
 
     }
 

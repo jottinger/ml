@@ -38,6 +38,8 @@ public interface PerceptronRepository {
      */
     List<Object> getAllTargets();
 
+    int getNodeId(Object token, Layer layer);
+
     /**
      * This is an enum that controls whether creating a node in the
      * repository is required or not.
