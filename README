@@ -57,8 +57,28 @@ Object[] targetArray=new Object[]{"test for echo", "counterparts"};
 // the actual target
 perceptron.train("half the world", targets, "test for echo");
 
-// getResults returns a Queue of PerceptronResults
+// getFirstResult() returns the most likely match
 Object classification=perceptron.getFirstResult("world", targets);
+
+There are also convenience methods that make the perceptron's API simpler;
+they use the entire set of target tokens as input. For the example above:
+
+PerceptronRepository repo = new HSQLDBPerceptronRepository();
+Perceptron perceptron=new PerceptronImpl(repo);
+
+// ensure the targets exist
+perceptron.createTarget("test for echo");
+perceptron.createTarget("counterparts");
+
+// train on input
+perceptron.train("half the world", "test for echo");
+
+// get classification
+Object classification=perceptron.getFirstResult("world");
+
+Note that these convenience methods are very slow compared to the version
+in which the targets are supplied, especially if there are many
+trainings applied at once.
 
 The Tokenizer's implications for the Perceptron
 
