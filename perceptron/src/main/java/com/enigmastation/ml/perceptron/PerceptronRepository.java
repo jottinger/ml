@@ -32,6 +32,13 @@ public interface PerceptronRepository {
     void generateHiddenNodes(List<Object> corpus, List<Object> targets);
 
     /**
+     * This method returns all targets contained by the Perceptron's data store.
+     *
+     * @return all nodes with Layer.TO
+     */
+    List<Object> getAllTargets();
+
+    /**
      * This is an enum that controls whether creating a node in the
      * repository is required or not.
      * <p/>

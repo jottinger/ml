@@ -117,6 +117,10 @@ public class PerceptronImpl implements Perceptron {
         }
     }
 
+    List<Object> getAllTargets() {
+        return repository.getAllTargets();
+    }
+
     @Override
     public void train(List<Object> corpus, List<Object> targets, Object selected) {
         PerceptronState state = buildPerceptron(corpus, targets);
@@ -162,8 +166,28 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
+    public Object getFirstResult(Object corpus) {
+        return getFirstResult(corpus, getAllTargets());
+    }
+
+    @Override
+    public Queue<PerceptronResult> getResults(Object corpus) {
+        return getResults(corpus, getAllTargets());
+    }
+
+    @Override
     public void train(Object corpus, List<Object> targets, Object selected) {
         train(tokenizer.tokenize(corpus), targets, selected);
+    }
+
+    @Override
+    public void train(Object corpus, Object selected) {
+        train(corpus, getAllTargets(), selected);
+    }
+
+    @Override
+    public void createTarget(Object target) {
+        repository.getNodeId(target, PerceptronRepository.Layer.TO, PerceptronRepository.NodeCreation.CREATE);
     }
 
     @Override

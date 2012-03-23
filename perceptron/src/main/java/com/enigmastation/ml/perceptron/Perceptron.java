@@ -30,6 +30,10 @@ public interface Perceptron {
 
     void train(Object corpus, List<Object> targets, Object selected);
 
+    void train(Object corpus, Object selected);
+
+    void createTarget(Object target);
+
     void train(Object corpus, Object[] targets, Object selected);
 
     Tokenizer getTokenizer();
@@ -45,4 +49,8 @@ public interface Perceptron {
     Object getFirstResult(Object corpus, List<Object> targets);
 
     Object getFirstResult(Object corpus, Object[] targets);
+
+    Object getFirstResult(Object corpus);
+
+    Queue<PerceptronResult> getResults(Object corpus);
 }

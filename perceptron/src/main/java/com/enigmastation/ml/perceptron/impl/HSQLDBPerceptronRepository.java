@@ -165,6 +165,25 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
     }
 
+    @Override
+    public List<Object> getAllTargets() {
+        List<Object> targets = new ArrayList<>();
+        ResultSet rs;
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("select create_key from node where layer=?")) {
+
+            ps.setInt(1, Layer.TO.ordinal());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                targets.add(rs.getString(1));
+            }
+            rs.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return targets;
+    }
+
     Connection getConnection() {
         try {
             return DriverManager.getConnection("jdbc:apache:commons:dbcp:perceptron");
