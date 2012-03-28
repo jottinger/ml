@@ -25,10 +25,7 @@ import org.apache.commons.dbcp.PoolingDriver;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is a repository for the perceptron that does internal resource pooling,
@@ -166,7 +163,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     }
 
     @Override
-    public void generateHiddenNodes(List<Object> corpus, List<Object> targets) {
+    public void generateHiddenNodes(List<?> corpus, List<?> targets) {
         StringBuilder sb = new StringBuilder();
         for (Object o : corpus) {
             sb.append(":").append(o.toString());
@@ -189,7 +186,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     }
 
     @Override
-    public List<Object> getAllTargets() {
+    public List<?> getAllTargets() {
         List<Object> targets = new ArrayList<>();
         ResultSet rs;
         try (Connection conn = getConnection();
@@ -239,8 +236,8 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
     }
 
     @Override
-    public List<Integer> getAllHiddenIds(List<Object> corpus, List<Object> targets) {
-        List<Integer> hiddenIds = new ArrayList<>();
+    public Set<Integer> getAllHiddenIds(List<?> corpus, List<?> targets) {
+        Set<Integer> hiddenIds = new TreeSet<>();
         PreparedStatement ps;
         ResultSet rs;
         try (Connection conn = getConnection()) {
@@ -258,7 +255,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
 
             ps = conn.prepareStatement("select fromid from " + Layer.TO.getStoreName()
                     + " where toid=?");
-            for (Object c : corpus) {
+            for (Object c : targets) {
                 ps.setInt(1, getNodeId(c, Layer.TO));
                 rs = ps.executeQuery();
                 if (rs.next()) {

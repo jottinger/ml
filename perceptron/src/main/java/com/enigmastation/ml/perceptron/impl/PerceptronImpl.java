@@ -40,14 +40,14 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public PerceptronState buildPerceptron(List<Object> corpus, List<Object> targets) {
+    public PerceptronState buildPerceptron(List<?> corpus, List<?> targets) {
         PerceptronState state = new PerceptronState(corpus, targets);
         repository.generateHiddenNodes(corpus, targets);
         state.setupNetwork(repository);
         return state;
     }
 
-    protected List<Double> feedForward(PerceptronState state) {
+    public List<Double> feedForward(PerceptronState state) {
         for (int i = 0; i < state.getWordIdsSize(); i++) {
             state.setAi(i, 1.0);
         }
@@ -99,7 +99,7 @@ public class PerceptronImpl implements Perceptron {
         for (int j = 0; j < state.getHiddenIdsSize(); j++) {
             for (int k = 0; k < state.getTargetIdsSize(); k++) {
                 double change = output_deltas[k] * state.getAh(j);
-                Map<Integer, Double> m = state.getWo(k);//.get(state.targetIds.get(k));
+                Map<Integer, Double> m = state.getWo(k);
                 double v = m.get(state.getHiddenId(j));
 
                 m.put(state.getHiddenId(j), v + n * change);
@@ -109,7 +109,7 @@ public class PerceptronImpl implements Perceptron {
         for (int i = 0; i < state.getWordIdsSize(); i++) {
             for (int j = 0; j < state.getHiddenIdsSize(); j++) {
                 double change = hidden_deltas[j] * state.getAi(i);
-                Map<Integer, Double> m = state.getWi(j);//.get(state.hiddenIds.get(j));
+                Map<Integer, Double> m = state.getWi(j);
                 double v = m.get(state.getWordId(i));
 
                 m.put(state.getWordId(i), v + n * change);
@@ -118,12 +118,12 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public List<Object> getAllTargets() {
+    public List<?> getAllTargets() {
         return repository.getAllTargets();
     }
 
     @Override
-    public void train(List<Object> corpus, List<Object> targets, Object selected) {
+    public void train(List<?> corpus, List<?> targets, Object selected) {
         PerceptronState state = buildPerceptron(corpus, targets);
         feedForward(state);
         backPropagate(state, selected);
@@ -131,7 +131,7 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public Queue<PerceptronResult> getResults(List<Object> corpus, List<Object> targets) {
+    public Queue<PerceptronResult> getResults(List<?> corpus, List<?> targets) {
         Queue<PerceptronResult> queue = new PriorityQueue<>();
         PerceptronState state = buildPerceptron(corpus, targets);
         List<Double> results = feedForward(state);
@@ -142,7 +142,7 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public Queue<PerceptronResult> getResults(Object corpus, List<Object> targets) {
+    public Queue<PerceptronResult> getResults(Object corpus, List<?> targets) {
         return getResults(tokenizer.tokenize(corpus), targets);
     }
 
@@ -152,12 +152,12 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public Object getFirstResult(List<Object> corpus, List<Object> targets) {
+    public Object getFirstResult(List<?> corpus, List<?> targets) {
         return getResults(corpus, targets).peek().getTarget();
     }
 
     @Override
-    public Object getFirstResult(Object corpus, List<Object> targets) {
+    public Object getFirstResult(Object corpus, List<?> targets) {
         return getFirstResult(tokenizer.tokenize(corpus), targets);
     }
 
@@ -177,7 +177,7 @@ public class PerceptronImpl implements Perceptron {
     }
 
     @Override
-    public void train(Object corpus, List<Object> targets, Object selected) {
+    public void train(Object corpus, List<?> targets, Object selected) {
         train(tokenizer.tokenize(corpus), targets, selected);
     }
 

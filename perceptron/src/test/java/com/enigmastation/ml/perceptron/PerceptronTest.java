@@ -36,6 +36,21 @@ public class PerceptronTest {
         repo.clear();
     }
 
+    @Test
+    public void testFeedForward() {
+        PerceptronImpl perceptron = new PerceptronImpl(repo);
+        List<String> corpus = new ArrayList<>();
+        corpus.add("world");
+        corpus.add("bank");
+        List<Object> targets = new ArrayList<>();
+        targets.add("worldbank");
+        targets.add("river");
+        targets.add("earth");
+        PerceptronState state = perceptron.buildPerceptron(corpus, targets);
+        System.out.println(perceptron.feedForward(state));
+    }
+
+
     @DataProvider
     Object[][] getTokenData() {
         return new Object[][]{
@@ -87,7 +102,7 @@ public class PerceptronTest {
         Object[] allTargets = new Object[]{"worldbank", "river", "earth"};
         Perceptron perceptron = new PerceptronImpl(repo);
         //noinspection UnusedDeclaration
-        for (int i : range(1, 30)) {
+        for (int i : range(0, 30)) {
             perceptron.train(Arrays.asList(new Object[]{"world", "bank"}),
                     Arrays.asList(allTargets), "worldbank");
             perceptron.train(Arrays.asList(new Object[]{"river", "bank"}),
@@ -117,7 +132,7 @@ public class PerceptronTest {
         };
         Perceptron perceptron = new PerceptronImpl(repo);
         //noinspection UnusedDeclaration
-        for (int i : range(1, 30)) {
+        for (int i : range(0, 30)) {
             for (String[] data : trainingSet) {
                 Object[] inputs = data[0].split(" ");
                 perceptron.train(Arrays.asList(inputs), targets, data[1]);
@@ -140,7 +155,7 @@ public class PerceptronTest {
         perceptron.createTarget("false");
 
         //noinspection UnusedDeclaration
-        for (int i : range(1, 30)) {
+        for (int i : range(0, 30)) {
             for (String[] data : trainingSet) {
                 perceptron.train(data[0], data[1]);
             }

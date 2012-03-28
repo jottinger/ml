@@ -16,27 +16,28 @@
 package com.enigmastation.ml.perceptron;
 
 import java.util.List;
+import java.util.Set;
 
 public interface PerceptronRepository {
     double getStrength(int from, int to, Layer layer);
 
     void setStrength(int from, int to, Layer layer, double strength);
 
-    List<Integer> getAllHiddenIds(List<Object> corpus, List<Object> targets);
+    Set<Integer> getAllHiddenIds(List<?> corpus, List<?> targets);
 
     /*
     * This could use a cache *so* bad... assuming it's called a whole lot for the same terms.
     */
     int getNodeId(Object token, Layer layer, NodeCreation creation);
 
-    void generateHiddenNodes(List<Object> corpus, List<Object> targets);
+    void generateHiddenNodes(List<?> corpus, List<?> targets);
 
     /**
      * This method returns all targets contained by the Perceptron's data store.
      *
      * @return all nodes with Layer.TO
      */
-    List<Object> getAllTargets();
+    List<?> getAllTargets();
 
     int getNodeId(Object token, Layer layer);
 
@@ -62,7 +63,7 @@ public interface PerceptronRepository {
         FROM,
         HIDDEN("wordhidden", -0.2),
         TO("hiddenword", 0.0);
-        String storeName;
+        String storeName = null;
         double strength = 0.0;
 
         Layer() {
@@ -74,6 +75,9 @@ public interface PerceptronRepository {
         }
 
         public double getStrength() {
+            if (storeName == null) {
+                throw new IllegalArgumentException("strength not implemented for layer " + this);
+            }
             return strength;
         }
 

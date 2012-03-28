@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Queue;
 
 public interface Perceptron {
-    PerceptronState buildPerceptron(List<Object> corpus, List<Object> targets);
+    PerceptronState buildPerceptron(List<?> corpus, List<?> targets);
 
-    void train(List<Object> corpus, List<Object> targets, Object selected);
+    void train(List<?> corpus, List<?> targets, Object selected);
 
-    Queue<PerceptronResult> getResults(List<Object> corpus, List<Object> targets);
+    Queue<PerceptronResult> getResults(List<?> corpus, List<?> targets);
 
-    void train(Object corpus, List<Object> targets, Object selected);
+    void train(Object corpus, List<?> targets, Object selected);
 
     /**
      * Trains the perceptron for all targets given the corpus and the preferred target.
@@ -48,13 +48,13 @@ public interface Perceptron {
 
     void setTokenizer(Tokenizer tokenizer);
 
-    Queue<PerceptronResult> getResults(Object corpus, List<Object> targets);
+    Queue<PerceptronResult> getResults(Object corpus, List<?> targets);
 
     Queue<PerceptronResult> getResults(Object corpus, Object[] targets);
 
-    Object getFirstResult(List<Object> corpus, List<Object> targets);
+    Object getFirstResult(List<?> corpus, List<?> targets);
 
-    Object getFirstResult(Object corpus, List<Object> targets);
+    Object getFirstResult(Object corpus, List<?> targets);
 
     Object getFirstResult(Object corpus, Object[] targets);
 
@@ -62,5 +62,5 @@ public interface Perceptron {
 
     Queue<PerceptronResult> getResults(Object corpus);
 
-    List<Object> getAllTargets();
+    List<?> getAllTargets();
 }

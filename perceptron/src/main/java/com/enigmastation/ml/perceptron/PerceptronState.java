@@ -27,8 +27,8 @@ import java.util.Map;
  * It is <strong>NOT</strong> meant to be reused. Train, then discard.
  */
 public final class PerceptronState {
-    private final List<Object> corpus;
-    private final List<Object> targets;
+    private final List<?> corpus;
+    private final List<?> targets;
     private final List<Integer> wordIds = new ArrayList<>();
     private final List<Integer> targetIds = new ArrayList<>();
     private final List<Integer> hiddenIds = new ArrayList<>();
@@ -39,7 +39,7 @@ public final class PerceptronState {
     private final Map<Integer, Map<Integer, Double>> wi = new HashMap<>();
     private final Map<Integer, Map<Integer, Double>> wo = new HashMap<>();
 
-    public PerceptronState(List<Object> corpus, List<Object> targets) {
+    public PerceptronState(List<?> corpus, List<?> targets) {
         this.corpus = corpus;
         this.targets = targets;
     }
@@ -167,5 +167,23 @@ public final class PerceptronState {
 
     public double getWoById(Integer k, Integer j) {
         return wo.get(k).get(j);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("PerceptronState");
+        sb.append("{corpus=").append(corpus);
+        sb.append(",\n targets=").append(targets);
+        sb.append(",\n wordIds=").append(wordIds);
+        sb.append(",\n targetIds=").append(targetIds);
+        sb.append(",\n hiddenIds=").append(hiddenIds);
+        sb.append(",\n ai=").append(ai);
+        sb.append(",\n ah=").append(ah);
+        sb.append(",\n ao=").append(ao);
+        sb.append(",\n wi=").append(wi);
+        sb.append(",\n wo=").append(wo);
+        sb.append('}');
+        return sb.toString();
     }
 }
