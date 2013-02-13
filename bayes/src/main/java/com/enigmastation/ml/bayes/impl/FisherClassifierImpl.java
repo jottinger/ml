@@ -83,7 +83,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
         return clf / frequencySum;
     }
 
-    private double fisherProbability(Object source, Object category) {
+    protected double fisherProbability(Object source, Object category) {
         double p = 1.0;
         List<Object> features = getFeatures(source);
         for (Object f : features) {

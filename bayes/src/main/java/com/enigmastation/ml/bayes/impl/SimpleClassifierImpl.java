@@ -200,7 +200,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     }
 
     // the number of times a feature has occurred in a category
-    private int featureCount(Object feature, Object category) {
+    protected int featureCount(Object feature, Object category) {
         Feature f = features.get(feature);
         if (f == null) {
             return 0;
@@ -262,7 +262,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return p;
     }
 
-    private double prob(Object corpus, Object category) {
+    protected double prob(Object corpus, Object category) {
         double categoryProbability = (1.0 * categoryCount(category)) / totalCount();
         double documentProbability = documentProbability(corpus, category);
         return documentProbability * categoryProbability;

@@ -23,6 +23,7 @@
             <version>${testngVersion}</version>
             <scope>test</scope>
         </dependency>
+
         <!-- I like javatar's tar archive much better than commons-compress' -->
         <dependency>
             <groupId>javatar</groupId>
