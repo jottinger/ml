@@ -17,6 +17,7 @@
 package com.enigmastation.ml.perceptron.impl;
 
 import com.enigmastation.ml.perceptron.PerceptronRepository;
+import com.enigmastation.ml.perceptron.RelationalPerceptronRepository;
 import com.enigmastation.ml.util.LRUCache;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -34,7 +35,7 @@ import java.util.*;
  * This can be generified, I think. It can also be changed to use a datasource
  * provider from JNDI.
  */
-public class HSQLDBPerceptronRepository implements PerceptronRepository {
+public class HSQLDBPerceptronRepository implements RelationalPerceptronRepository {
     final static int DEFAULT_ID = -1;
     Map<Layer, LRUCache<String, Integer>> nodeIdCache = new HashMap<>();
 
@@ -67,7 +68,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         nodeIdCache.put(Layer.TO, new LRUCache<String, Integer>(10));
     }
 
-    private void buildTables() {
+    protected void buildTables() {
         PreparedStatement ps;
         try (Connection conn = getConnection()) {
             List<String> tables = new ArrayList<>();
@@ -204,7 +205,7 @@ public class HSQLDBPerceptronRepository implements PerceptronRepository {
         return targets;
     }
 
-    Connection getConnection() {
+    public Connection getConnection() {
         try {
             return DriverManager.getConnection("jdbc:apache:commons:dbcp:perceptron");
         } catch (SQLException e) {
