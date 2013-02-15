@@ -26,8 +26,56 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class PorterTokenizer implements Tokenizer {
+    int minLength = 2;
+    Set<String> ignoredWords = new TreeSet<>();
+
+    public PorterTokenizer() {
+        addIgnoredWords("and", "the", "but");
+    }
+
+    public PorterTokenizer(int minLength) {
+        this();
+        this.minLength = minLength;
+    }
+
+    public int getMinLength() {
+        return minLength;
+    }
+
+    public void setMinLength(int minLength) {
+        this.minLength = minLength;
+    }
+
+    public synchronized void addIgnoredWords(String... words) {
+        Set<String> stemmedWords = new TreeSet<>();
+        StringBuilder sb = new StringBuilder(words.length * 8);
+
+        for (String word : words) {
+            sb.append(word).append(" ");
+        }
+
+        List<Object> tokens = tokenize(sb.toString());
+        for (Object o : tokens) {
+            ignoredWords.add(o.toString());
+        }
+    }
+
+    public synchronized void clearIgnoredWords() {
+        ignoredWords.clear();
+    }
+
+    public Set<String> getIgnoredWords() {
+        return new TreeSet<>(ignoredWords);
+    }
+
+    public synchronized void removeIgnoredWord(String word) {
+        ignoredWords.remove(word);
+    }
+
     @Override
     public List<Object> tokenize(Object source) {
         List<Object> tokens = new ArrayList<>(source.toString().length() / 5);
@@ -39,7 +87,9 @@ public class PorterTokenizer implements Tokenizer {
         try {
             while (filter.incrementToken()) {
                 String term = charTermAttribute.toString().toLowerCase();
-                if (term.length() > 2) {
+                term=term.replace("'", "");
+                term=term.replace("\u2019", "");
+                if (term.length() > minLength && !ignoredWords.contains(term)) {
                     tokens.add(term);
                 }
             }
