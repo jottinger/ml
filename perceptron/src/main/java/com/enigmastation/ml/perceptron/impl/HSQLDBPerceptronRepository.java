@@ -16,7 +16,6 @@
 
 package com.enigmastation.ml.perceptron.impl;
 
-import com.enigmastation.ml.perceptron.PerceptronRepository;
 import com.enigmastation.ml.perceptron.RelationalPerceptronRepository;
 import com.enigmastation.ml.util.LRUCache;
 import org.apache.commons.dbcp.ConnectionFactory;
@@ -38,6 +37,12 @@ import java.util.*;
 public class HSQLDBPerceptronRepository implements RelationalPerceptronRepository {
     final static int DEFAULT_ID = -1;
     Map<Layer, LRUCache<String, Integer>> nodeIdCache = new HashMap<>();
+
+    public HSQLDBPerceptronRepository() {
+        buildTables();
+        nodeIdCache.put(Layer.FROM, new LRUCache<String, Integer>(150));
+        nodeIdCache.put(Layer.TO, new LRUCache<String, Integer>(10));
+    }
 
     public void clear() {
         try (Connection conn = getConnection()) {
@@ -62,12 +67,6 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
         driver.registerPool("perceptron", connectionPool);
     }
 
-    public HSQLDBPerceptronRepository() {
-        buildTables();
-        nodeIdCache.put(Layer.FROM, new LRUCache<String, Integer>(150));
-        nodeIdCache.put(Layer.TO, new LRUCache<String, Integer>(10));
-    }
-
     protected void buildTables() {
         PreparedStatement ps;
         try (Connection conn = getConnection()) {
@@ -79,16 +78,25 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
             if (!tables.contains("node")) {
                 conn.prepareStatement("create table node(id bigint identity, layer int, create_key longvarchar)")
                         .execute();
+                conn.prepareStatement("create unique index node_ck on node(create_key, layer)").execute();
             }
             if (!tables.contains("wordhidden")) {
                 conn.prepareStatement("create table " + Layer.HIDDEN.getStoreName()
                         + " (id bigint identity, fromid bigint, toid bigint, strength double)")
                         .execute();
+                conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx1 on " +
+                        Layer.HIDDEN.getStoreName() + "(fromid)").execute();
+                conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx2 on " +
+                        Layer.HIDDEN.getStoreName() + "(toid)").execute();
             }
             if (!tables.contains("hiddenword")) {
                 conn.prepareStatement("create table " + Layer.TO.getStoreName()
                         + " (id bigint identity, fromid bigint, toid bigint, strength double)")
                         .execute();
+                conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx1 on " +
+                        Layer.HIDDEN.getStoreName() + "(fromid)").execute();
+                conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx2 on " +
+                        Layer.HIDDEN.getStoreName() + "(toid)").execute();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
