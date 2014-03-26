@@ -24,6 +24,7 @@ import com.enigmastation.ml.tokenizer.Tokenizer;
 import com.enigmastation.ml.tokenizer.impl.SimpleTokenizer;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @com.enigmastation.ml.perceptron.annotations.Perceptron
 @NeuralNetwork
@@ -48,9 +49,8 @@ public class PerceptronImpl implements Perceptron {
     }
 
     public List<Double> feedForward(PerceptronState state) {
-        for (int i = 0; i < state.getWordIdsSize(); i++) {
-            state.setAi(i, 1.0);
-        }
+        IntStream.range(0, state.getWordIdsSize()).forEach(i->state.setAi(i, 1.0));
+
         for (int j = 0; j < state.getHiddenIdsSize(); j++) {
             double sum = 0.0;
             for (int i = 0; i < state.getWordIdsSize(); i++) {

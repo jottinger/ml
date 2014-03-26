@@ -45,36 +45,31 @@ public final class PerceptronState {
     }
 
     public void setupNetwork(PerceptronRepository repository) {
-        for (Object o : corpus) {
-            wordIds.add(repository.getNodeId(o, PerceptronRepository.Layer.FROM, PerceptronRepository.NodeCreation.CREATE));
-        }
-        for (Object o : targets) {
-            targetIds.add(repository.getNodeId(o, PerceptronRepository.Layer.TO, PerceptronRepository.NodeCreation.CREATE));
-        }
+        corpus.stream()
+                .map(o -> repository.getNodeId(o, PerceptronRepository.Layer.FROM, PerceptronRepository.NodeCreation.CREATE))
+                .forEach(wordIds::add);
+        targets.stream()
+                .map(o -> repository.getNodeId(o, PerceptronRepository.Layer.TO, PerceptronRepository.NodeCreation.CREATE))
+                .forEach(targetIds::add);
         hiddenIds.addAll(repository.getAllHiddenIds(corpus, targets));
-        for (int i : wordIds) {
-            ai.add(1.0);
-        }
-        for (int i : targetIds) {
-            ao.add(1.0);
-        }
-        for (int i : hiddenIds) {
-            ah.add(1.0);
-        }
-        for (int h : hiddenIds) {
+        wordIds.forEach(w -> ai.add(1.0));
+        targetIds.forEach(w -> ao.add(1.0));
+        hiddenIds.forEach(w -> ah.add(1.0));
+        hiddenIds.stream().forEach(h -> {
             Map<Integer, Double> targetMap = new HashMap<>();
             wi.put(h, targetMap);
-            for (int c : wordIds) {
-                targetMap.put(c, repository.getStrength(c, h, PerceptronRepository.Layer.HIDDEN));
-            }
-        }
-        for (int t : targetIds) {
+            wordIds.stream().forEach(c ->
+                            targetMap.put(c, repository.getStrength(c, h, PerceptronRepository.Layer.HIDDEN))
+            );
+        });
+
+        targetIds.stream().forEach(t -> {
             Map<Integer, Double> targetMap = new HashMap<>();
             wo.put(t, targetMap);
-            for (int h : hiddenIds) {
+            hiddenIds.stream().forEach(h -> {
                 targetMap.put(h, repository.getStrength(h, t, PerceptronRepository.Layer.TO));
-            }
-        }
+            });
+        });
     }
 
     public void setAi(int index, double value) {

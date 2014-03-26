@@ -40,8 +40,8 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
 
     public HSQLDBPerceptronRepository() {
         buildTables();
-        nodeIdCache.put(Layer.FROM, new LRUCache<String, Integer>(150));
-        nodeIdCache.put(Layer.TO, new LRUCache<String, Integer>(10));
+        nodeIdCache.put(Layer.FROM, new LRUCache<>(150));
+        nodeIdCache.put(Layer.TO, new LRUCache<>(10));
     }
 
     public void clear() {
