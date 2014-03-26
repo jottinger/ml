@@ -8,7 +8,6 @@
         <artifactId>ml-parent</artifactId>
         <version>4.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.enigmastation.ml</groupId>
     <artifactId>perceptron</artifactId>
     <version>4.0-SNAPSHOT</version>
     <name>perceptron</name>
@@ -20,7 +19,6 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>${testngVersion}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -32,7 +30,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>14.0</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
@@ -45,56 +42,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                </configuration>
-            </plugin>
-            <!--
-                <plugin>
-                    <groupId>org.scala-tools</groupId>
-                    <artifactId>maven-scala-plugin</artifactId>
-                    <version>${scala.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                                <goal>testCompile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <jvmArgs>
-                            <jvmArg>-Xms64m</jvmArg>
-                            <jvmArg>-Xmx1024m</jvmArg>
-                        </jvmArgs>
-                    </configuration>
-                </plugin>
-            -->
-        </plugins>
-    </build>
-    <!--
-    <repositories>
-        <repository>
-            <id>scala-tools.org</id>
-            <name>Scala-tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>scala-tools.org</id>
-            <name>Scala-tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
-        </pluginRepository>
-    </pluginRepositories>
-    -->
 </project>

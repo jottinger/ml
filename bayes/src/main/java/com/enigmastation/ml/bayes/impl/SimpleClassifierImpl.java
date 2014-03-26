@@ -111,6 +111,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         Map<Object, Double> probabilities = getClassificationProbabilities(source);
         double max = 0.0;
         Object category = null;
+
         for (Map.Entry<Object, Double> entry : probabilities.entrySet()) {
             if (entry.getValue() > max) {
                 max = entry.getValue();
@@ -135,7 +136,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      *
      * @param source the source corpus for the classification operation
      * @return A Map where the key is the classification category and the value
-     *         is the strength of that category
+     * is the strength of that category
      */
     @Override
     public Map<Object, Double> getClassificationProbabilities(Object source) {
@@ -155,9 +156,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     @Override
     public void train(Object source, Object classification) {
         List<Object> features = getFeatures(source);
-        for (Object feature : features) {
-            incrementFeature(feature, classification);
-        }
+        features.stream().forEach(f -> incrementFeature(f, classification));
         incrementCategory(classification);
     }
 
@@ -192,7 +191,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     }
 
     private void incrementCategory(Object category) {
-        Integer oldCount = categories.get(category);
+        Integer oldCount = categories.computeIfAbsent(category, f->0);
         if (oldCount == null) {
             oldCount = 0;
         }

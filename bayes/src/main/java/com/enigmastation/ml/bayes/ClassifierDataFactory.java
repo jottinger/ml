@@ -22,4 +22,9 @@ public interface ClassifierDataFactory {
     Cache<Object, Integer> buildCategories();
 
     Cache<Object, Feature> buildFeatures();
+
+    default void clear() {
+        buildCategories().clear();
+        buildFeatures().clear();
+    }
 }
