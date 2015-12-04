@@ -4,25 +4,20 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.enigmastation.ml</groupId>
     <artifactId>ml-parent</artifactId>
-    <version>4.0-SNAPSHOT</version>
+    <version>5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ml-parent</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <testngVersion>6.8.7</testngVersion>
-        <luceneVersion>3.4.0</luceneVersion>
-        <infinispanVersion>6.0.2.Final</infinispanVersion>
-        <guavaVersion>16.0</guavaVersion>
+        <testngVersion>[6.8.7,)</testngVersion>
+        <luceneVersion>[3.4.0,)</luceneVersion>
+        <!-- guava 19 is not released yet -->
+        <guavaVersion>[18.0,18.9)</guavaVersion>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>javax.cache</groupId>
-                <artifactId>cache-api</artifactId>
-                <version>1.0.0-RC1</version>
-            </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
@@ -33,11 +28,6 @@
                 <groupId>org.apache.lucene</groupId>
                 <artifactId>lucene-analyzers</artifactId>
                 <version>${luceneVersion}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-core</artifactId>
-                <version>${infinispanVersion}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -53,17 +43,14 @@
             <dependency>
                 <groupId>javatar</groupId>
                 <artifactId>javatar</artifactId>
-                <version>2.5</version>
+                <version>[2.5,)</version>
                 <scope>test</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
     <modules>
         <module>common</module>
-        <module>bayes</module>
-        <module>perceptron</module>
         <module>corpus-test</module>
     </modules>
 
@@ -82,35 +69,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

@@ -24,14 +24,11 @@ import org.apache.lucene.util.Version;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class PorterTokenizer implements Tokenizer {
     int minLength = 2;
-    Set<String> ignoredWords = new TreeSet<>();
+    Set<String> ignoredWords = new HashSet<>();
 
     public PorterTokenizer() {
         addIgnoredWords("and", "the", "but");
@@ -58,7 +55,7 @@ public class PorterTokenizer implements Tokenizer {
             sb.append(word).append(" ");
         }
 
-        List<Object> tokens = tokenize(sb.toString());
+        Set<String> tokens = tokenize(sb.toString());
         for (Object o : tokens) {
             ignoredWords.add(o.toString());
         }
@@ -77,11 +74,11 @@ public class PorterTokenizer implements Tokenizer {
     }
 
     @Override
-    public List<Object> tokenize(Object source) {
-        List<Object> tokens = new ArrayList<>(source.toString().length() / 5);
+    public Set<String> tokenize(String source) {
+        Set<String> tokens = new HashSet<>();
         org.apache.lucene.analysis.Tokenizer tokenizer =
                 new StandardTokenizer(Version.LUCENE_34,
-                        new StringReader(source.toString()));
+                        new StringReader(source));
         CharTermAttribute charTermAttribute = tokenizer.getAttribute(CharTermAttribute.class);
         PorterStemFilter filter = new PorterStemFilter(tokenizer);
         try {

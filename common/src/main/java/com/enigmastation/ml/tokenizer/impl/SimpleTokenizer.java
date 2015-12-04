@@ -18,16 +18,13 @@ package com.enigmastation.ml.tokenizer.impl;
 
 import com.enigmastation.ml.tokenizer.Tokenizer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class SimpleTokenizer implements Tokenizer {
     @Override
-    public List<Object> tokenize(Object source) {
-        String src = source.toString();
-        List<Object> tokens = new ArrayList<>(src.length() / 6);
-        Scanner scanner = new Scanner(src);
+    public Set<String> tokenize(String source) {
+        Set<String> tokens = new HashSet<>(source.length() / 6);
+        Scanner scanner = new Scanner(source);
         while (scanner.hasNext("\\S*")) {
             tokens.add(scanner.next("\\S*"));
         }

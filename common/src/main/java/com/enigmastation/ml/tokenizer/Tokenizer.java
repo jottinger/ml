@@ -16,8 +16,8 @@
 
 package com.enigmastation.ml.tokenizer;
 
-import java.util.List;
+import java.util.Set;
 
 public interface Tokenizer {
-    List<Object> tokenize(Object source);
+    Set<String> tokenize(String source);
 }

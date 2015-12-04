@@ -16,7 +16,6 @@
 
 package com.enigmastation.ml.bayes;
 
-import com.enigmastation.ml.bayes.impl.FisherClassifierImpl;
 import com.ice.tar.TarArchive;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.testng.annotations.Test;
@@ -34,7 +33,7 @@ public class CorpusTest {
     int hits;
     int misses;
     int tests;
-
+/*
     @Test(groups = {"fulltest"})
     public void testCorpus() throws URISyntaxException, IOException, InterruptedException {
         final Classifier classifier = new FisherClassifierImpl();
@@ -178,4 +177,5 @@ public class CorpusTest {
 
         return "/src/test/resources/publiccorpus/" + inputFile.getName() + ".data";
     }
+*/
 }
