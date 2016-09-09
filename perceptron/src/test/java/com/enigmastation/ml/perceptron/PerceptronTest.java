@@ -21,11 +21,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class PerceptronTest {
     HSQLDBPerceptronRepository repo = new HSQLDBPerceptronRepository();
@@ -179,8 +178,11 @@ public class PerceptronTest {
     public void testXOR() {
         List<Object> targets = Arrays.asList(new Object[]{"true", "false"});
         String[][] trainingSet =
-                new String[][]{new String[]{"1true xor 2true", "false"}, new String[]{"1true xor 2false", "true"},
-                        new String[]{"1false xor 2true", "true"},};
+                new String[][]{
+                        new String[]{"1true xor 2true", "false"},
+                        new String[]{"1true xor 2false", "true"},
+                        new String[]{"1false xor 2true", "true"},
+                };
         Perceptron perceptron = new PerceptronImpl(repo);
         //noinspection UnusedDeclaration
         for (int i : range(0, 30)) {
@@ -189,6 +191,19 @@ public class PerceptronTest {
                 perceptron.train(Arrays.asList(inputs), targets, data[1]);
             }
         }
-        System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"1false", "xor", "2false"}), targets));
+        Queue<PerceptronResult> results = perceptron.getResults(Arrays.asList(new Object[]{"1false", "xor", "2false"}));
+        System.out.println(results);
+        double trueStrength = 0.0;
+        double falseStrength = 0.0;
+        for (PerceptronResult result : results) {
+            Objects.requireNonNull(result);
+            if (result.getTarget().toString().equalsIgnoreCase("true")) {
+                trueStrength = result.getStrength();
+            }
+            if (result.getTarget().toString().equalsIgnoreCase("false")) {
+                falseStrength = result.getStrength();
+            }
+        }
+        assertTrue(trueStrength > falseStrength);
     }
 }
