@@ -21,7 +21,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -176,6 +179,8 @@ public class PerceptronTest {
 
     @Test
     public void testXOR() {
+        // Clear the repo before executing this test.
+        repo.clear();
         List<Object> targets = Arrays.asList(new Object[]{"true", "false"});
         String[][] trainingSet =
                 new String[][]{
@@ -193,17 +198,12 @@ public class PerceptronTest {
         }
         Queue<PerceptronResult> results = perceptron.getResults(Arrays.asList(new Object[]{"1false", "xor", "2false"}));
         System.out.println(results);
-        double trueStrength = 0.0;
-        double falseStrength = 0.0;
-        for (PerceptronResult result : results) {
-            Objects.requireNonNull(result);
-            if (result.getTarget().toString().equalsIgnoreCase("true")) {
-                trueStrength = result.getStrength();
-            }
-            if (result.getTarget().toString().equalsIgnoreCase("false")) {
-                falseStrength = result.getStrength();
-            }
-        }
-        assertTrue(trueStrength > falseStrength);
+        assertEquals(results.size(), 2);
+        List resultList = new ArrayList(results);
+        PerceptronResult firstPerceptron = ((PerceptronResult) resultList.get(0));
+        PerceptronResult secondPerceptron = ((PerceptronResult) resultList.get(1));
+        // No need to assert for strength since it's a priority queue and true should always be first
+        assertTrue(firstPerceptron.getTarget().equals("true"));
+        assertTrue(secondPerceptron.getTarget().equals("false")); // Not needed but just to make test clear.
     }
 }
