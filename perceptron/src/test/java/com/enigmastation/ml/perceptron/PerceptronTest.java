@@ -199,11 +199,8 @@ public class PerceptronTest {
         Queue<PerceptronResult> results = perceptron.getResults(Arrays.asList(new Object[]{"1false", "xor", "2false"}));
         System.out.println(results);
         assertEquals(results.size(), 2);
-        List resultList = new ArrayList(results);
-        PerceptronResult firstPerceptron = ((PerceptronResult) resultList.get(0));
-        PerceptronResult secondPerceptron = ((PerceptronResult) resultList.get(1));
+        PerceptronResult result = results.poll();
         // No need to assert for strength since it's a priority queue and true should always be first
-        assertTrue(firstPerceptron.getTarget().equals("true"));
-        assertTrue(secondPerceptron.getTarget().equals("false")); // Not needed but just to make test clear.
+        assertTrue(result.getTarget().equals("true"));
     }
 }
