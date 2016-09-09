@@ -87,13 +87,13 @@ public class PerceptronTest {
     public void testTrain() {
         Perceptron perceptron = new PerceptronImpl(repo);
         System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"world", "bank"}),
-                Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
+                        Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
         );
         perceptron.train(Arrays.asList(new Object[]{"world", "bank"}),
                 Arrays.asList(new Object[]{"worldbank", "river", "earth"}),
                 "worldbank");
         System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"world", "bank"}),
-                Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
+                        Arrays.asList(new Object[]{"worldbank", "river", "earth"}))
         );
     }
 
@@ -173,5 +173,22 @@ public class PerceptronTest {
             value += delta;
         }
         return list;
+    }
+
+    @Test
+    public void testXOR() {
+        List<Object> targets = Arrays.asList(new Object[]{"true", "false"});
+        String[][] trainingSet =
+                new String[][]{new String[]{"1true xor 2true", "false"}, new String[]{"1true xor 2false", "true"},
+                        new String[]{"1false xor 2true", "true"},};
+        Perceptron perceptron = new PerceptronImpl(repo);
+        //noinspection UnusedDeclaration
+        for (int i : range(0, 30)) {
+            for (String[] data : trainingSet) {
+                Object[] inputs = data[0].split(" ");
+                perceptron.train(Arrays.asList(inputs), targets, data[1]);
+            }
+        }
+        System.out.println(perceptron.getResults(Arrays.asList(new Object[]{"1false", "xor", "2false"}), targets));
     }
 }
