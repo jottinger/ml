@@ -6,8 +6,8 @@ import java.util.Map;
 /**
  * This is an LRUCache that expands its max size by one for every ten cache overflows.
  *
- * @param <K>
- * @param <V>
+ * @param <K> Key
+ * @param <V> Value
  */
 public class LRUCache<K, V> extends LinkedHashMap<K, V> {
     private int maxSize;

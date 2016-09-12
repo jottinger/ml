@@ -30,7 +30,7 @@ import java.util.*;
 /**
  * This is a repository for the perceptron that does internal resource pooling,
  * and is customized for use with HSQLDB.
- * <p/>
+ * <p> </p>
  * This can be generified, I think. It can also be changed to use a datasource
  * provider from JNDI.
  */

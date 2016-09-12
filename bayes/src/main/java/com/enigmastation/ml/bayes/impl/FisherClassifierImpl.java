@@ -47,7 +47,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
      * This sets the minimum strength required for the supplied category to be considered as a
      * classification result. If the classification operation yields a weaker probability than
      * this strength, the result is ignored.
-     * <p/>
+     * <p> </p>
      * The result of this is that you are able to say "classify as category 'x' but only if 'x'
      * is very likely," for example.
      *
