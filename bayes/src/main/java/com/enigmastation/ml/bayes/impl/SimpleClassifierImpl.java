@@ -78,10 +78,10 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * This returns the best-match classification from the bayesian engine if
      * and only if the classification is more probable than the default threshold
      * for classification.
-     * <p> </p>
+     * <p>
      * The default threshold is normally 0.0, which means the default classification
      * will be used only if no match at all is found with this method.
-     * <p> </p>
+     * <p>
      * As a result, it probably shouldn't be used. You should prefer
      * classify(Object, Object, double) instead.
      *
@@ -96,7 +96,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     /**
      * This returns the best-match classification from the bayesian engine if
      * and only if the classification is more probable than the strength threshold.
-     * <p> </p>
+     * <p>
      * If the best-match classification is less probable than the threshold,
      * the default classification is returned.
      *

@@ -44,10 +44,10 @@ public interface PerceptronRepository {
     /**
      * This is an enum that controls whether creating a node in the
      * repository is required or not.
-     * <p> </p>
+     * <p>
      * The cases in which it's not primarily focus around situations in which
      * the nodes have extra actions associated with creation.
-     * <p> </p>
+     * <p>
      * This is a PerceptronRepository-specific control.
      */
     enum NodeCreation {

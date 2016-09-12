@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * This is a class that represents a specific classification/training phase.
- * <p> </p>
+ * <p>
  * It is <strong>NOT</strong> meant to be reused. Train, then discard.
  */
 public final class PerceptronState {
