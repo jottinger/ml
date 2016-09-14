@@ -141,7 +141,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     @Override
     public Map<Object, Double> getClassificationProbabilities(Object source) {
         Map<Object, Double> probabilities = new HashMap<>();
-        for (Object category : getCategoriesKeySet()) {
+        for (Object category : getCategories()) {
             probabilities.put(category, documentProbability(source, category));
         }
         return probabilities;
@@ -155,8 +155,8 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      */
     @Override
     public void train(Object source, Object classification) {
-        List<Object> trainFeatures = getFeatures(source);
-        trainFeatures.stream().forEach(f -> incrementFeature(f, classification));
+        List<Object> features = getFeatures(source);
+        features.stream().forEach(f -> incrementFeature(f, classification));
         incrementCategory(classification);
     }
 
@@ -168,15 +168,15 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @return The tokenized source
      */
     protected List<Object> getFeatures(Object source) {
-        List<Object> tempFeatures;
+        List<Object> features;
         if (source.equals(lastData.get())) {
-            tempFeatures = lastFeatures.get();
+            features = lastFeatures.get();
         } else {
-            tempFeatures = tokenizer.tokenize(source);
-            lastFeatures.set(tempFeatures);
+            features = tokenizer.tokenize(source);
+            lastFeatures.set(features);
         }
         lastData.set(source);
-        return tempFeatures;
+        return features;
     }
 
     private void incrementFeature(Object feature, Object category) {
@@ -222,7 +222,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return sum;
     }
 
-    protected Set<Object> getCategoriesKeySet() {
+    protected Set<Object> getCategories() {
         return categories.keySet();
     }
 
@@ -237,7 +237,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         double basicProbability = featureProb(feature, category);
 
         double totals = 0;
-        for (Object cat : getCategoriesKeySet()) {
+        for (Object cat : getCategories()) {
             totals += featureCount(feature, cat);
         }
         return ((weight * assumedProbability) + (totals * basicProbability)) / (weight + totals);

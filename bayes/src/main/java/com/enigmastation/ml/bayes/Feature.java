@@ -16,7 +16,6 @@
 
 package com.enigmastation.ml.bayes;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class Feature implements Serializable {
 
     private static final String NOT_ALLOWED = "not allowed!";
 
-    Object featureObject;
+    Object feature;
     Map<Object, Integer> categories = new HashMap<>();
 
     public Map<Object, Integer> getCategories() {
@@ -42,19 +41,13 @@ public class Feature implements Serializable {
     }
 
     public Object getFeature() {
-        return featureObject;
+        return feature;
     }
 
     public void setFeature(Object feature) {
-        this.featureObject = feature;
+        this.feature = feature;
     }
 
-    /**
-     * TODO: Needs to be done
-     *
-     * @param category
-     * @return
-     */
     public Integer getCountForCategory(Object category) {
         Integer count = categories.get(category);
         if (count == null) {
@@ -74,28 +67,5 @@ public class Feature implements Serializable {
             oldCount = 0;
         }
         categories.put(category, oldCount + 1);
-    }
-
-    /**
-     * TODO: Needs to be done since a Serializable class should have all transient or serializable objects
-     *
-     * @param out
-     * @throws IOException
-     */
-    private void writeObject(java.io.ObjectOutputStream out)
-            throws IOException {
-        throw new UnsupportedOperationException(NOT_ALLOWED);
-    }
-
-    /**
-     * TODO: Needs to be done since a Serializable class should have all transient or serializable objects
-     *
-     * @param in
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void readObject(java.io.ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-        throw new UnsupportedOperationException(NOT_ALLOWED);
     }
 }

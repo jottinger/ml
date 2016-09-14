@@ -102,7 +102,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
                 .mapToDouble(f -> weightedProb(f, category))
                 .forEach(w -> p[0] *= w);
         double fisherScore = -2.0 * Math.log(p[0]);
-        return invChi(fisherScore, ((double) features.size()) * 2);
+        return invChi(fisherScore, features.size() * 2.0);
     }
 
     protected double invChi(double chi, double df) {
@@ -129,7 +129,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
     public Object classify(Object source, Object defaultClassification) {
         Object[] best = {defaultClassification};
         double[] max = {0.0};
-        getCategoriesKeySet().stream().forEach(c -> {
+        getCategories().stream().forEach(c -> {
             double p = fisherProbability(source, c);
             if (p > getMinimum(c) && p > max[0]) {
                 best[0] = c;
