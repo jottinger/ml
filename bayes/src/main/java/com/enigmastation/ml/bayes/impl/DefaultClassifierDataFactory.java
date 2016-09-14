@@ -34,7 +34,7 @@ public class DefaultClassifierDataFactory implements ClassifierDataFactory {
         try {
             cacheManager = new DefaultCacheManager("bayes-cache.xml");
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 
