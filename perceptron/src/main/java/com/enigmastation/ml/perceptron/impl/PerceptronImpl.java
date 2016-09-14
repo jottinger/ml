@@ -143,7 +143,8 @@ public class PerceptronImpl implements Perceptron {
 
     @Override
     public Queue<PerceptronResult> getResults(Object corpus, List<?> targets) {
-        return getResults(tokenizer.tokenize(corpus), targets);
+        // ugh
+        return getResults(tokenizer.tokenize(corpus.toString()), targets);
     }
 
     @Override
@@ -158,7 +159,7 @@ public class PerceptronImpl implements Perceptron {
 
     @Override
     public Object getFirstResult(Object corpus, List<?> targets) {
-        return getFirstResult(tokenizer.tokenize(corpus), targets);
+        return getFirstResult(tokenizer.tokenize(corpus.toString()), targets);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class PerceptronImpl implements Perceptron {
 
     @Override
     public void train(Object corpus, List<?> targets, Object selected) {
-        train(tokenizer.tokenize(corpus), targets, selected);
+        train(tokenizer.tokenize(corpus.toString()), targets, selected);
     }
 
     @Override

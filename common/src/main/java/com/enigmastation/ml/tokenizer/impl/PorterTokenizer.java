@@ -23,6 +23,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,7 @@ public class PorterTokenizer implements Tokenizer {
             sb.append(word).append(" ");
         }
 
-        List<Object> tokens = tokenize(sb.toString());
+        List<Serializable> tokens = tokenize(sb.toString());
         for (Object o : tokens) {
             ignoredWords.add(o.toString());
         }
@@ -77,8 +78,8 @@ public class PorterTokenizer implements Tokenizer {
     }
 
     @Override
-    public List<Object> tokenize(Object source) {
-        List<Object> tokens = new ArrayList<>(source.toString().length() / 5);
+    public List<Serializable> tokenize(Serializable source) {
+        List<Serializable> tokens = new ArrayList<>(source.toString().length() / 5);
         org.apache.lucene.analysis.Tokenizer tokenizer =
                 new StandardTokenizer(Version.LUCENE_34,
                         new StringReader(source.toString()));

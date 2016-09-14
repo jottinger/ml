@@ -20,6 +20,7 @@ import com.enigmastation.ml.tokenizer.impl.PorterTokenizer;
 import com.enigmastation.ml.tokenizer.impl.SimpleTokenizer;
 import org.testng.annotations.Test;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -28,7 +29,7 @@ public class TokenizerTest {
     @Test
     public void testSimpleTokenizer() {
         Tokenizer tokenizer = new SimpleTokenizer();
-        List<Object> objects = tokenizer.tokenize("1 2 3 4 5 6 7");
+        List<Serializable> objects = tokenizer.tokenize("1 2 3 4 5 6 7");
         assertEquals(objects.size(), 7);
     }
 

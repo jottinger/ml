@@ -15,6 +15,8 @@
  */
 package com.enigmastation.ml.bayes;
 
+import java.io.Serializable;
+
 /**
  * This is a placeholder interface for the SimpleClassifier; it mostly exists
  * to provide a valid and cohesive hierarchy for the FisherClassifier.
@@ -26,7 +28,7 @@ public interface SimpleClassifier extends Classifier {
      * @param category
      * @return
      */
-    double getThreshold(Object category);
+    double getThreshold(Serializable  category);
 
     /**
      * TODO: Needs to be done
@@ -34,5 +36,5 @@ public interface SimpleClassifier extends Classifier {
      * @param category
      * @param threshold
      */
-    void setThreshold(Object category, Double threshold);
+    void setThreshold(Serializable category, Double threshold);
 }

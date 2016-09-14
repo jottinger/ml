@@ -16,6 +16,7 @@
 
 package com.enigmastation.ml.bayes;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ public interface Classifier {
      * @param source the source corpus for the classification operation
      * @return the best-match classification
      */
-    Object classify(Object source);
+    Serializable classify(Serializable source);
 
     /**
      * This returns the best-match classification from the bayesian engine if
@@ -49,7 +50,7 @@ public interface Classifier {
      * @param defaultClassification the default classification
      * @return the best-match classification
      */
-    Object classify(Object source, Object defaultClassification);
+    Serializable classify(Serializable source, Serializable defaultClassification);
 
     /**
      * This returns the best-match classification from the bayesian engine if
@@ -64,7 +65,7 @@ public interface Classifier {
      * @param strength              the strength threshold for the best-match
      * @return the best-match or default classification
      */
-    Object classify(Object source, Object defaultClassification, double strength);
+    Serializable classify(Serializable source, Serializable defaultClassification, double strength);
 
     /**
      * This method returns the raw classification data, as a map. The map contains
@@ -74,7 +75,7 @@ public interface Classifier {
      * @return A Map where the key is the classification category and the value
      * is the strength of that category
      */
-    Map<Object, Double> getClassificationProbabilities(Object source);
+    Map<Serializable, Double> getClassificationProbabilities(Serializable source);
 
     /**
      * This method trains the classifier.
@@ -82,5 +83,5 @@ public interface Classifier {
      * @param source         The source text for the training operation
      * @param classification The classification for which to train
      */
-    void train(Object source, Object classification);
+    void train(Serializable source, Serializable classification);
 }

@@ -16,31 +16,31 @@
 
 package com.enigmastation.ml.bayes;
 
-import org.infinispan.Cache;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * TODO: Needs to be done
  */
 public interface ClassifierDataFactory {
     /**
-     * Needs to be done
-     *
-     * @return
+     * Builds a general-purpose cache for categories
+     * @return category cache
      */
-    Cache<Object, Integer> buildCategories();
-
-    /**
-     * TODO: Needs to be done
-     *
-     * @return
-     */
-    Cache<Object, Feature> buildFeatures();
-
-    /**
-     * TODO: Needs to be done
-     */
-    default void clear() {
-        buildCategories().clear();
-        buildFeatures().clear();
+    default Map<Serializable, Integer> buildCategories() {
+            return new ConcurrentHashMap<>();
     }
+
+    /**
+     * Builds a general-purpose cache for features
+     * @return feature cache
+     */
+    default Map<Serializable, Feature> buildFeatures() {
+        return new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Invalidates all cache contents, forcing reload if possible
+     */
+    void clear();
 }

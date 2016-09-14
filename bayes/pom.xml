@@ -8,7 +8,6 @@
         <groupId>com.enigmastation.ml</groupId>
         <version>4.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.enigmastation.ml</groupId>
     <artifactId>bayes</artifactId>
     <version>4.0-SNAPSHOT</version>
     <name>bayes</name>
@@ -31,12 +30,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.cache</groupId>
-            <artifactId>cache-api</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 </project>

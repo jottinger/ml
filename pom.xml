@@ -10,10 +10,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <testngVersion>6.8.7</testngVersion>
-        <luceneVersion>3.4.0</luceneVersion>
-        <infinispanVersion>6.0.2.Final</infinispanVersion>
-        <guavaVersion>16.0</guavaVersion>
+        <testngVersion>6.9.10</testngVersion>
+        <luceneVersion>3.6.2</luceneVersion>
+        <infinispanVersion>8.2.4.Final</infinispanVersion>
+        <guavaVersion>19.0</guavaVersion>
     </properties>
 
     <dependencyManagement>

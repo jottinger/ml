@@ -17,8 +17,8 @@
 package com.enigmastation.ml.bayes;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TODO: Needs to be done
@@ -29,14 +29,15 @@ public class Feature implements Serializable {
 
     private static final String NOT_ALLOWED = "not allowed!";
 
-    Object feature;
-    Map<Object, Integer> categories = new HashMap<>();
+    private Serializable feature;
 
-    public Map<Object, Integer> getCategories() {
+    private Map<Serializable, Integer> categories = new ConcurrentHashMap<>();
+
+    public Map<Serializable, Integer> getCategories() {
         return categories;
     }
 
-    public void setCategories(Map<Object, Integer> categories) {
+    public void setCategories(Map<Serializable, Integer> categories) {
         this.categories = categories;
     }
 
@@ -44,28 +45,24 @@ public class Feature implements Serializable {
         return feature;
     }
 
-    public void setFeature(Object feature) {
+    public void setFeature(Serializable feature) {
         this.feature = feature;
     }
 
-    public Integer getCountForCategory(Object category) {
-        Integer count = categories.get(category);
-        if (count == null) {
-            return 0;
-        }
-        return count;
+    public Integer getCountForCategory(Serializable category) {
+        return categories.getOrDefault(category, 0);
+    }
+
+    public Feature(Serializable feature) {
+        this.feature=feature;
     }
 
     /**
-     * TODO: Needs to be done
+     * Increments the number of features for a given category
      *
-     * @param category
+     * @param category the category name
      */
-    public void incrementCategoryCount(Object category) {
-        Integer oldCount = categories.get(category);
-        if (oldCount == null) {
-            oldCount = 0;
-        }
-        categories.put(category, oldCount + 1);
+    public void incrementCategoryCount(Serializable category) {
+        categories.put(category,categories.getOrDefault(category,0)+1);
     }
 }

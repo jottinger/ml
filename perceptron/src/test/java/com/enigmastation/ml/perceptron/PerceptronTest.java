@@ -15,7 +15,7 @@
  */
 package com.enigmastation.ml.perceptron;
 
-import com.enigmastation.ml.perceptron.impl.HSQLDBPerceptronRepository;
+import com.enigmastation.ml.perceptron.impl.H2PerceptronRepository;
 import com.enigmastation.ml.perceptron.impl.PerceptronImpl;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
@@ -30,7 +30,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class PerceptronTest {
-    HSQLDBPerceptronRepository repo = new HSQLDBPerceptronRepository();
+    H2PerceptronRepository repo = new H2PerceptronRepository();
 
     @BeforeTest
     public void clear() {

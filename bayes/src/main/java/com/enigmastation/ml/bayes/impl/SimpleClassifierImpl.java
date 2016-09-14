@@ -16,19 +16,19 @@
 
 package com.enigmastation.ml.bayes.impl;
 
-import com.enigmastation.ml.bayes.ClassifierDataFactory;
 import com.enigmastation.ml.bayes.Feature;
 import com.enigmastation.ml.bayes.SimpleClassifier;
 import com.enigmastation.ml.bayes.annotations.BayesClassifier;
 import com.enigmastation.ml.bayes.annotations.NaiveBayesClassifier;
 import com.enigmastation.ml.tokenizer.Tokenizer;
 import com.enigmastation.ml.tokenizer.impl.PorterTokenizer;
-import org.infinispan.Cache;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is a simple (naive) bayesian classifier.
@@ -36,30 +36,12 @@ import java.util.Set;
 @BayesClassifier
 @NaiveBayesClassifier
 public class SimpleClassifierImpl implements SimpleClassifier {
-    private static final ThreadLocal<Object> lastData = new ThreadLocal<>();
-    private static final ThreadLocal<List<Object>> lastFeatures = new ThreadLocal<>();
-    protected Cache<Object, Feature> features;
-    protected Cache<Object, Integer> categories;
-    protected Tokenizer tokenizer = new PorterTokenizer();
-    protected Map<Object, Double> thresholds = new HashMap<>();
-
-    /**
-     * This constructor uses the supplied ClassifierDataFactory as a backing store.
-     *
-     * @param factory The ClassifierDataFactory to use
-     */
-    SimpleClassifierImpl(ClassifierDataFactory factory) {
-        features = factory.buildFeatures();
-        categories = factory.buildCategories();
-    }
-
-    /**
-     * This constructor uses the default classifier data factory (oddly enough,
-     * the class name is "DefaultClassifierDataFactory".)
-     */
-    public SimpleClassifierImpl() {
-        this(new DefaultClassifierDataFactory());
-    }
+    private static final ThreadLocal<Serializable> lastData = new ThreadLocal<>();
+    private static final ThreadLocal<List<Serializable>> lastFeatures = new ThreadLocal<>();
+    private Map<Serializable, Feature> features = new ConcurrentHashMap<>();
+    Map<Serializable, Integer> categories = new ConcurrentHashMap<>();
+    private Tokenizer tokenizer = new PorterTokenizer();
+    private Map<Serializable, Double> thresholds = new ConcurrentHashMap<>();
 
     /**
      * This returns the best-match classification from the bayesian engine.
@@ -70,7 +52,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @return the best-match classification
      */
     @Override
-    public Object classify(Object source) {
+    public Serializable classify(Serializable source) {
         return classify(source, "none");
     }
 
@@ -89,7 +71,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @return the best-match classification
      */
     @Override
-    public Object classify(Object source, Object defaultClassification) {
+    public Serializable classify(Serializable source, Serializable defaultClassification) {
         return classify(source, defaultClassification, 0.0);
     }
 
@@ -107,18 +89,18 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @return the best-match or default classification
      */
     @Override
-    public Object classify(Object source, Object defaultClassification, double strength) {
-        Map<Object, Double> probabilities = getClassificationProbabilities(source);
+    public Serializable classify(Serializable source, Serializable defaultClassification, double strength) {
+        Map<Serializable, Double> probabilities = getClassificationProbabilities(source);
         double max = 0.0;
-        Object category = null;
+        Serializable category = null;
 
-        for (Map.Entry<Object, Double> entry : probabilities.entrySet()) {
+        for (Map.Entry<Serializable, Double> entry : probabilities.entrySet()) {
             if (entry.getValue() > max) {
                 max = entry.getValue();
                 category = entry.getKey();
             }
         }
-        for (Map.Entry<Object, Double> entry : probabilities.entrySet()) {
+        for (Map.Entry<Serializable, Double> entry : probabilities.entrySet()) {
             if (entry.getKey().equals(category)) {
                 continue;
             }
@@ -139,9 +121,9 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * is the strength of that category
      */
     @Override
-    public Map<Object, Double> getClassificationProbabilities(Object source) {
-        Map<Object, Double> probabilities = new HashMap<>();
-        for (Object category : getCategories()) {
+    public Map<Serializable, Double> getClassificationProbabilities(Serializable source) {
+        Map<Serializable, Double> probabilities = new HashMap<>();
+        for (Serializable category : getCategories()) {
             probabilities.put(category, documentProbability(source, category));
         }
         return probabilities;
@@ -154,9 +136,9 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @param classification The classification for which to train
      */
     @Override
-    public void train(Object source, Object classification) {
-        List<Object> features = getFeatures(source);
-        features.stream().forEach(f -> incrementFeature(f, classification));
+    public void train(Serializable source, Serializable classification) {
+        List<Serializable> features = getFeatures(source);
+        features.forEach(f -> incrementFeature(f, classification));
         incrementCategory(classification);
     }
 
@@ -167,8 +149,8 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @param source The source to tokenize
      * @return The tokenized source
      */
-    protected List<Object> getFeatures(Object source) {
-        List<Object> features;
+    List<Serializable> getFeatures(Serializable source) {
+        List<Serializable> features;
         if (source.equals(lastData.get())) {
             features = lastFeatures.get();
         } else {
@@ -179,27 +161,18 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return features;
     }
 
-    private void incrementFeature(Object feature, Object category) {
-        Feature f = features.get(feature);
-        if (f == null) {
-            f = new Feature();
-            f.setFeature(feature);
-            f.setCategories(new HashMap<Object, Integer>());
-        }
+    private void incrementFeature(Serializable feature, Serializable category) {
+        Feature f = features.computeIfAbsent(feature, Feature::new);
         features.put(feature, f);
         f.incrementCategoryCount(category);
     }
 
-    private void incrementCategory(Object category) {
-        Integer oldCount = categories.computeIfAbsent(category, f -> 0);
-        if (oldCount == null) {
-            oldCount = 0;
-        }
-        categories.put(category, oldCount + 1);
+    private void incrementCategory(Serializable category) {
+        categories.put(category, categories.getOrDefault(category, 0) + 1);
     }
 
     // the number of times a feature has occurred in a category
-    protected int featureCount(Object feature, Object category) {
+    int featureCount(Serializable feature, Serializable category) {
         Feature f = features.get(feature);
         if (f == null) {
             return 0;
@@ -207,7 +180,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return f.getCountForCategory(category);
     }
 
-    private int categoryCount(Object category) {
+    private int categoryCount(Serializable category) {
         if (categories.containsKey(category)) {
             return categories.get(category);
         }
@@ -222,46 +195,46 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return sum;
     }
 
-    protected Set<Object> getCategories() {
+    Set<Serializable> getCategories() {
         return categories.keySet();
     }
 
-    protected double featureProb(Object feature, Object category) {
+    double featureProb(Serializable feature, Serializable category) {
         if (categoryCount(category) == 0) {
             return 0.0;
         }
         return (1.0 * featureCount(feature, category)) / categoryCount(category);
     }
 
-    private double weightedProb(Object feature, Object category, double weight, double assumedProbability) {
+    private double weightedProb(Serializable feature, Serializable category, double weight, double assumedProbability) {
         double basicProbability = featureProb(feature, category);
 
         double totals = 0;
-        for (Object cat : getCategories()) {
+        for (Serializable cat : getCategories()) {
             totals += featureCount(feature, cat);
         }
         return ((weight * assumedProbability) + (totals * basicProbability)) / (weight + totals);
     }
 
-    private double weightedProb(Object feature, Object category, double weight) {
+    private double weightedProb(Serializable feature, Serializable category, double weight) {
         return weightedProb(feature, category, weight, 0.5);
     }
 
-    protected double weightedProb(Object feature, Object category) {
+    double weightedProb(Serializable feature, Serializable category) {
         return weightedProb(feature, category, 1.0);
     }
 
     /* naive bayes, very naive - and not what we usually need. */
-    private double documentProbability(Object source, Object category) {
-        List<Object> documentProbabilityFeatures = getFeatures(source);
+    private double documentProbability(Serializable source, Serializable category) {
+        List<Serializable> documentProbabilityFeatures = getFeatures(source);
         double p = 1.0;
-        for (Object f : documentProbabilityFeatures) {
+        for (Serializable f : documentProbabilityFeatures) {
             p *= weightedProb(f, category);
         }
         return p;
     }
 
-    protected double prob(Object corpus, Object category) {
+    double prob(Serializable corpus, Serializable category) {
         double categoryProbability = (1.0 * categoryCount(category)) / totalCount();
         double documentProbability = documentProbability(corpus, category);
         return documentProbability * categoryProbability;
@@ -275,7 +248,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @param threshold the minimum threshold
      */
     @Override
-    public void setThreshold(Object category, Double threshold) {
+    public void setThreshold(Serializable category, Double threshold) {
         thresholds.put(category, threshold);
     }
 
@@ -286,7 +259,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
      * @return the strength associated with the category
      */
     @Override
-    public double getThreshold(Object category) {
+    public double getThreshold(Serializable category) {
         if (thresholds.containsKey(category)) {
             return thresholds.get(category);
         }

@@ -16,39 +16,24 @@
 
 package com.enigmastation.ml.bayes.impl;
 
-import com.enigmastation.ml.bayes.ClassifierDataFactory;
 import com.enigmastation.ml.bayes.FisherClassifier;
 import com.enigmastation.ml.bayes.annotations.BayesClassifier;
 import com.enigmastation.ml.bayes.annotations.FisherBayesClassifier;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
 /**
- * TODO: Needs to be done
+ * This is a bayesian classifier that uses the Fisher method. See https://en.wikipedia.org/wiki/Fisher_information
+ * for more.
  */
 @BayesClassifier
 @FisherBayesClassifier
 public class FisherClassifierImpl extends SimpleClassifierImpl implements FisherClassifier {
-    Map<Object, Double> minimums = new HashMap<>();
-
-    /**
-     * Constructs the object
-     */
-    public FisherClassifierImpl() {
-        super();
-    }
-
-    /**
-     * Constructs the object
-     *
-     * @param factory
-     */
-    public FisherClassifierImpl(ClassifierDataFactory factory) {
-        super(factory);
-    }
+    private Map<Serializable, Double> minimums = new ConcurrentHashMap<>();
 
     /**
      * This accesses the current minimum strength for the category. If the probability of a
@@ -58,7 +43,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
      * @return the strength
      */
     @Override
-    public double getMinimum(Object category) {
+    public double getMinimum(Serializable category) {
         return minimums.computeIfAbsent(category, f -> 0.0);
     }
 
@@ -74,15 +59,15 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
      * @param strength the minimum probability to accept for this category
      */
     @Override
-    public void setMinimum(Object category, double strength) {
+    public void setMinimum(Serializable category, double strength) {
         minimums.put(category, strength);
     }
 
     @Override
-    protected double featureProb(Object feature, Object category) {
+    protected double featureProb(Serializable feature, Serializable category) {
         double clf = super.featureProb(feature, category);
-        // TODO: Floating point values shouldn't be tested for equality
-        if (clf == 0.0) {
+
+        if (Math.abs(clf)<0.000001) {
             return 0.0;
         }
 
@@ -94,9 +79,9 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
         return clf / frequencySum;
     }
 
-    protected double fisherProbability(Object source, Object category) {
+    double fisherProbability(Serializable source, Serializable category) {
         final double[] p = {1.0};
-        List<Object> features = getFeatures(source);
+        List<Serializable> features = getFeatures(source);
         features
                 .stream()
                 .mapToDouble(f -> weightedProb(f, category))
@@ -105,7 +90,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
         return invChi(fisherScore, features.size() * 2.0);
     }
 
-    protected double invChi(double chi, double df) {
+    private double invChi(double chi, double df) {
         double m = chi / 2.0;
         final double[] sum = {Math.exp(-m)};
         final double[] term = {sum[0]};
@@ -126,8 +111,8 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
      * @return the best-match classification
      */
     @Override
-    public Object classify(Object source, Object defaultClassification) {
-        Object[] best = {defaultClassification};
+    public Serializable classify(Serializable source, Serializable defaultClassification) {
+        Serializable[] best = {defaultClassification};
         double[] max = {0.0};
 
         getCategories().forEach(c -> {

@@ -15,6 +15,8 @@
  */
 package com.enigmastation.ml.bayes;
 
+import java.io.Serializable;
+
 /**
  * TODO: Needs to be done
  */
@@ -26,7 +28,7 @@ public interface FisherClassifier extends SimpleClassifier {
      * @param category The category for which to acquire the minimum strength
      * @return the strength
      */
-    double getMinimum(Object category);
+    double getMinimum(Serializable category);
 
     /**
      * This sets the minimum strength required for the supplied category to be considered as a
@@ -39,5 +41,5 @@ public interface FisherClassifier extends SimpleClassifier {
      * @param category the category for which the strength is mutated
      * @param strength the minimum probability to accept for this category
      */
-    void setMinimum(Object category, double strength);
+    void setMinimum(Serializable category, double strength);
 }

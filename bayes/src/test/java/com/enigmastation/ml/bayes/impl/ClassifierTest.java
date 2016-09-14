@@ -17,19 +17,11 @@
 package com.enigmastation.ml.bayes.impl;
 
 
-import com.enigmastation.ml.bayes.ClassifierDataFactory;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 
 public class ClassifierTest {
-    @BeforeMethod
-    public void clearCache() {
-        ClassifierDataFactory f = new DefaultClassifierDataFactory();
-        f.clear();
-    }
-
     @Test
     public void testInternalsOfTrain() {
         SimpleClassifierImpl c = new SimpleClassifierImpl();
