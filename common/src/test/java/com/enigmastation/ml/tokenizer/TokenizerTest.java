@@ -36,6 +36,7 @@ public class TokenizerTest {
     public void testPorterTokenizer() {
         Tokenizer porterTokenizer = new PorterTokenizer();
         porterTokenizer.tokenize("Now is the time for all good men to come to the aid of their finalizing country.");
-        assertEquals(porterTokenizer.tokenize("the quick brown fox jumps over the lazy dog's tail").size(), 10);
+        System.out.println(porterTokenizer.tokenize("the quick brown fox jumps over the lazy dog's tail"));
+        assertEquals(porterTokenizer.tokenize("the quick brown fox jumps over the lazy dog's tail").size(), 8);
     }
 }
