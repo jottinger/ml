@@ -42,6 +42,11 @@ public interface PerceptronRepository {
     int getNodeId(Object token, Layer layer);
 
     /**
+     * Returns the repository to default (untrained) state.
+     */
+    void clear();
+
+    /**
      * This is an enum that controls whether creating a node in the
      * repository is required or not.
      * <p>
