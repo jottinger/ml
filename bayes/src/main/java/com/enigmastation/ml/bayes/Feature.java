@@ -20,7 +20,15 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * TODO: Needs to be done
+ */
 public class Feature implements Serializable {
+
+    private static final long serialVersionUID = 1905122041950251207L;
+
+    private static final String NOT_ALLOWED = "not allowed!";
+
     Object feature;
     Map<Object, Integer> categories = new HashMap<>();
 
@@ -48,6 +56,11 @@ public class Feature implements Serializable {
         return count;
     }
 
+    /**
+     * TODO: Needs to be done
+     *
+     * @param category
+     */
     public void incrementCategoryCount(Object category) {
         Integer oldCount = categories.get(category);
         if (oldCount == null) {

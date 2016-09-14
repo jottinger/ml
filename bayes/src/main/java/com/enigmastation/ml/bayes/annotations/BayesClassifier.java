@@ -19,6 +19,9 @@ package com.enigmastation.ml.bayes.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * TODO: Need to document this.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BayesClassifier {
 }

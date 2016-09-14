@@ -20,7 +20,19 @@ package com.enigmastation.ml.bayes;
  * to provide a valid and cohesive hierarchy for the FisherClassifier.
  */
 public interface SimpleClassifier extends Classifier {
+    /**
+     * TODO: Needs to be done
+     *
+     * @param category
+     * @return
+     */
     double getThreshold(Object category);
 
+    /**
+     * TODO: Needs to be done
+     *
+     * @param category
+     * @param threshold
+     */
     void setThreshold(Object category, Double threshold);
 }

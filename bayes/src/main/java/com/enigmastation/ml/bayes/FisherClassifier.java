@@ -15,6 +15,9 @@
  */
 package com.enigmastation.ml.bayes;
 
+/**
+ * TODO: Needs to be done
+ */
 public interface FisherClassifier extends SimpleClassifier {
     /**
      * This accesses the current minimum strength for the category. If the probability of a
