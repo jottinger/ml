@@ -120,7 +120,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
     public Object classify(Object source, Object defaultClassification) {
         Object[] best = {defaultClassification};
         double[] max = {0.0};
-        categories().stream().forEach(c -> {
+        categories().forEach(c -> {
             double p = fisherProbability(source, c);
             if (p > getMinimum(c) && p > max[0]) {
                 best[0] = c;

@@ -35,6 +35,12 @@ ehthumbs.db
 Icon?
 Thumbs.db
 
+# database files #
+##################
+**/perceptron.lck
+**/perceptron.script
+**/perceptron.properties
+
 # maven directories #
 #####################
 target/

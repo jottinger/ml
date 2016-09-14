@@ -26,6 +26,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This is a repository for the perceptron that does internal resource pooling,
@@ -35,8 +36,8 @@ import java.util.*;
  * provider from JNDI.
  */
 public class HSQLDBPerceptronRepository implements RelationalPerceptronRepository {
-    final static int DEFAULT_ID = -1;
-    Map<Layer, LRUCache<String, Integer>> nodeIdCache = new HashMap<>();
+    private final static int DEFAULT_ID = -1;
+    private final Map<Layer, LRUCache<String, Integer>> nodeIdCache = new HashMap<>();
 
     public HSQLDBPerceptronRepository() {
         buildTables();
@@ -46,9 +47,15 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
 
     public void clear() {
         try (Connection conn = getConnection()) {
-            conn.prepareStatement("drop table node").execute();
-            conn.prepareStatement("drop table wordhidden").execute();
-            conn.prepareStatement("drop table hiddenword").execute();
+            try (PreparedStatement ps = conn.prepareStatement("drop table node")) {
+                ps.execute();
+            }
+            try (PreparedStatement ps = conn.prepareStatement("drop table wordhidden")) {
+                ps.execute();
+            }
+            try (PreparedStatement ps = conn.prepareStatement("drop table hiddenword")) {
+                ps.execute();
+            }
             buildTables();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -60,43 +67,58 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
         GenericObjectPool connectionPool = new GenericObjectPool(null);
         ConnectionFactory connectionFactory =
                 new DriverManagerConnectionFactory("jdbc:hsqldb:file:perceptron", "SA", "");
-        @SuppressWarnings("UnusedDeclaration")
+        @SuppressWarnings({"UnusedDeclaration", "unused"})
         PoolableConnectionFactory poolableConnectionFactory =
                 new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, false, true);
         PoolingDriver driver = new PoolingDriver();
         driver.registerPool("perceptron", connectionPool);
     }
 
-    protected void buildTables() {
-        PreparedStatement ps;
+    private void buildTables() {
         try (Connection conn = getConnection()) {
             List<String> tables = new ArrayList<>();
-            ResultSet rs = conn.getMetaData().getTables(null, null, null, null);
-            while (rs.next()) {
-                tables.add(rs.getString(3).toLowerCase());
-            }
-            if (!tables.contains("node")) {
-                conn.prepareStatement("create table node(id bigint identity, layer int, create_key longvarchar)")
-                        .execute();
-                conn.prepareStatement("create unique index node_ck on node(create_key, layer)").execute();
-            }
-            if (!tables.contains("wordhidden")) {
-                conn.prepareStatement("create table " + Layer.HIDDEN.getStoreName()
-                        + " (id bigint identity, fromid bigint, toid bigint, strength double)")
-                        .execute();
-                conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx1 on " +
-                        Layer.HIDDEN.getStoreName() + "(fromid)").execute();
-                conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx2 on " +
-                        Layer.HIDDEN.getStoreName() + "(toid)").execute();
-            }
-            if (!tables.contains("hiddenword")) {
-                conn.prepareStatement("create table " + Layer.TO.getStoreName()
-                        + " (id bigint identity, fromid bigint, toid bigint, strength double)")
-                        .execute();
-                conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx1 on " +
-                        Layer.HIDDEN.getStoreName() + "(fromid)").execute();
-                conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx2 on " +
-                        Layer.HIDDEN.getStoreName() + "(toid)").execute();
+            try (ResultSet rs = conn.getMetaData().getTables(null, null, null, null)) {
+                while (rs.next()) {
+                    tables.add(rs.getString(3).toLowerCase());
+                }
+                if (!tables.contains("node")) {
+                    try (PreparedStatement ps = conn.prepareStatement(
+                            "create table node(id bigint identity, layer int, create_key longvarchar)")) {
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement(
+                            "create unique index node_ck on node(create_key, layer)")) {
+                        ps.execute();
+                    }
+                }
+                if (!tables.contains("wordhidden")) {
+                    try (PreparedStatement ps = conn.prepareStatement("create table " + Layer.HIDDEN.getStoreName()
+                            + " (id bigint identity, fromid bigint, toid bigint, strength double)")) {
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx1 on " +
+                            Layer.HIDDEN.getStoreName() + "(fromid)")) {
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("create index " + Layer.HIDDEN.getStoreName() + "_idx2 on " +
+                            Layer.HIDDEN.getStoreName() + "(toid)")) {
+                        ps.execute();
+                    }
+                }
+                if (!tables.contains("hiddenword")) {
+                    try (PreparedStatement ps = conn.prepareStatement("create table " + Layer.TO.getStoreName()
+                            + " (id bigint identity, fromid bigint, toid bigint, strength double)")) {
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx1 on " +
+                            Layer.HIDDEN.getStoreName() + "(fromid)")) {
+                        ps.execute();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("create index " + Layer.TO.getStoreName() + "_idx2 on " +
+                            Layer.HIDDEN.getStoreName() + "(toid)")) {
+                        ps.execute();
+                    }
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -114,8 +136,6 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
     @Override
     public int getNodeId(Object token, Layer layer, NodeCreation creation) {
         int id = DEFAULT_ID;
-        PreparedStatement ps;
-        ResultSet rs;
         // check the cache! -- but we don't cache hidden nodes.
         if (!layer.equals(Layer.HIDDEN)) {
             Integer nodeId = nodeIdCache.get(layer).get(token.toString());
@@ -125,21 +145,19 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
         }
         if (id == DEFAULT_ID) {
             try (Connection conn = getConnection()) {
-                ps = conn.prepareStatement("select id from node where create_key=? and layer=?");
-                ps.setString(1, token.toString());
-                ps.setInt(2, layer.ordinal());
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                    id = rs.getInt(1);
-                } else {
-                    if (creation == NodeCreation.CREATE) {
-                        rs.close();
-                        ps.close();
-                        id = createNode(token, layer);
+                try (PreparedStatement ps = conn.prepareStatement("select id from node where create_key=? and layer=?")) {
+                    ps.setString(1, token.toString());
+                    ps.setInt(2, layer.ordinal());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            id = rs.getInt(1);
+                        } else {
+                            if (creation == NodeCreation.CREATE) {
+                                id = createNode(token, layer);
+                            }
+                        }
                     }
                 }
-                rs.close();
-                ps.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -152,19 +170,17 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
 
     private int createNode(Object token, Layer layer) {
         int id;
-        PreparedStatement ps;
-        ResultSet rs;
         try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("insert into node (create_key, layer) values (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, token.toString());
-            ps.setInt(2, layer.ordinal());
-            ps.executeUpdate();
-            rs = ps.getGeneratedKeys();
-            rs.next();
-            id = rs.getInt(1);
-            rs.close();
-            ps.close();
+            try (PreparedStatement ps = conn.prepareStatement("insert into node (create_key, layer) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, token.toString());
+                ps.setInt(2, layer.ordinal());
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    rs.next();
+                    id = rs.getInt(1);
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -173,14 +189,11 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
 
     @Override
     public void generateHiddenNodes(List<?> corpus, List<?> targets) {
-        StringBuilder sb = new StringBuilder();
-        for (Object o : corpus) {
-            sb.append(":").append(o.toString());
-        }
+        String nodeText = corpus.stream().map(Object::toString).collect(Collectors.joining(":"));
         // we need to know if it's not there, because we need to create a data set if not
-        int id = getNodeId(sb.toString(), Layer.HIDDEN, NodeCreation.NO_CREATE);
+        int id = getNodeId(nodeText, Layer.HIDDEN, NodeCreation.NO_CREATE);
         if (id == DEFAULT_ID) { // not found!
-            id = createNode(sb.toString(), Layer.HIDDEN);
+            id = createNode(nodeText, Layer.HIDDEN);
             // now create connections!
             for (Object token : corpus) {
                 setStrength(getNodeId(token, Layer.FROM),
@@ -191,22 +204,19 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
                         Layer.TO, 0.1);
             }
         }
-
     }
 
     @Override
     public List<?> getAllTargets() {
         List<Object> targets = new ArrayList<>();
-        ResultSet rs;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement("select create_key from node where layer=?")) {
-
             ps.setInt(1, Layer.TO.ordinal());
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                targets.add(rs.getString(1));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    targets.add(rs.getString(1));
+                }
             }
-            rs.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -224,20 +234,17 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
     @Override
     public double getStrength(int from, int to, Layer layer) {
         double strength = layer.getStrength();
-        PreparedStatement ps;
-        ResultSet rs;
 
-        try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select strength from " + layer.getStoreName() +
-                    " where fromid=? and toid=?");
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("select strength from " + layer.getStoreName() +
+                     " where fromid=? and toid=?")) {
             ps.setInt(1, from);
             ps.setInt(2, to);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                strength = rs.getDouble(1);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    strength = rs.getDouble(1);
+                }
             }
-            rs.close();
-            ps.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -247,32 +254,31 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
     @Override
     public Set<Integer> getAllHiddenIds(List<?> corpus, List<?> targets) {
         Set<Integer> hiddenIds = new TreeSet<>();
-        PreparedStatement ps;
-        ResultSet rs;
-        try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getStoreName()
-                    + " where fromid=?");
-            for (Object c : corpus) {
-                ps.setInt(1, getNodeId(c, Layer.FROM));
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                    hiddenIds.add(rs.getInt(1));
-                }
-                rs.close();
-            }
-            ps.close();
 
-            ps = conn.prepareStatement("select fromid from " + Layer.TO.getStoreName()
-                    + " where toid=?");
-            for (Object c : targets) {
-                ps.setInt(1, getNodeId(c, Layer.TO));
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                    hiddenIds.add(rs.getInt(1));
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement("select toid from " + Layer.HIDDEN.getStoreName()
+                    + " where fromid=?")) {
+                for (Object c : corpus) {
+                    ps.setInt(1, getNodeId(c, Layer.FROM));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            hiddenIds.add(rs.getInt(1));
+                        }
+                    }
                 }
-                rs.close();
             }
-            ps.close();
+
+            try (PreparedStatement ps = conn.prepareStatement("select fromid from " + Layer.TO.getStoreName()
+                    + " where toid=?")) {
+                for (Object c : targets) {
+                    ps.setInt(1, getNodeId(c, Layer.TO));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            hiddenIds.add(rs.getInt(1));
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -281,37 +287,34 @@ public class HSQLDBPerceptronRepository implements RelationalPerceptronRepositor
 
     @Override
     public void setStrength(int from, int to, Layer layer, double strength) {
-        PreparedStatement ps;
-        ResultSet rs;
         try (Connection conn = getConnection()) {
-            ps = conn.prepareStatement("select id from " + layer.getStoreName()
-                    + " where fromid=? and toid=?");
-            ps.setInt(1, from);
-            ps.setInt(2, to);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                // update
-                int id = rs.getInt(1);
-                rs.close();
-                ps.close();
-                ps = conn.prepareStatement("update " + layer.getStoreName()
-                        + " set strength=? where id=?");
-                ps.setDouble(1, strength);
-                ps.setInt(2, id);
-                ps.executeUpdate();
-            } else {
-                rs.close();
-                ps.close();
-                // insert
-                ps = conn.prepareStatement("insert into " + layer.getStoreName() +
-                        " (fromid, toid, strength) " +
-                        " values (?, ?, ?)");
+            try (PreparedStatement ps = conn.prepareStatement("select id from " + layer.getStoreName()
+                    + " where fromid=? and toid=?")) {
                 ps.setInt(1, from);
                 ps.setInt(2, to);
-                ps.setDouble(3, strength);
-                ps.executeUpdate();
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        // update
+                        int id = rs.getInt(1);
+                        try (PreparedStatement update = conn.prepareStatement("update " + layer.getStoreName()
+                                + " set strength=? where id=?")) {
+                            update.setDouble(1, strength);
+                            update.setInt(2, id);
+                            update.executeUpdate();
+                        }
+                    } else {
+                        // insert
+                        try (PreparedStatement insert = conn.prepareStatement("insert into " + layer.getStoreName() +
+                                " (fromid, toid, strength) " +
+                                " values (?, ?, ?)")) {
+                            insert.setInt(1, from);
+                            insert.setInt(2, to);
+                            insert.setDouble(3, strength);
+                            insert.executeUpdate();
+                        }
+                    }
+                }
             }
-            ps.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
