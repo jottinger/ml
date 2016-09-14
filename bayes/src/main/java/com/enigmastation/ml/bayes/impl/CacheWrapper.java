@@ -6,7 +6,6 @@ import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.Configuration;
 import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
-import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
 import java.util.*;
 
@@ -15,9 +14,26 @@ import java.util.*;
  * Date: 3/26/14
  * Time: 7:50 AM
  */
+
+/**
+ * User: jottinge
+ * Date: 3/26/14
+ * Time: 7:50 AM
+ * TODO: Needs to work more on this.
+ *
+ * @param <K> is key
+ * @param <V> is value
+ */
 public class CacheWrapper<K, V> implements Cache<K, V> {
+
+    private final static String NOT_ALLOWED = "not allowed!";
     private final org.infinispan.Cache<K, V> internalCache;
 
+    /**
+     * Constructs cache
+     *
+     * @param cache
+     */
     public CacheWrapper(org.infinispan.Cache<K, V> cache) {
         internalCache = cache;
     }
@@ -41,7 +57,7 @@ public class CacheWrapper<K, V> implements Cache<K, V> {
 
     @Override
     public void loadAll(Set<? extends K> ks, boolean b, CompletionListener completionListener) {
-
+        throw new UnsupportedOperationException(NOT_ALLOWED);
     }
 
     @Override
@@ -115,8 +131,7 @@ public class CacheWrapper<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public <T> T invoke(K k, EntryProcessor<K, V, T> kvtEntryProcessor, Object... objects)
-            throws EntryProcessorException {
+    public <T> T invoke(K k, EntryProcessor<K, V, T> kvtEntryProcessor, Object... objects) {
         return null;
     }
 
@@ -137,7 +152,7 @@ public class CacheWrapper<K, V> implements Cache<K, V> {
 
     @Override
     public void close() {
-
+        throw new UnsupportedOperationException(NOT_ALLOWED);
     }
 
     @Override
@@ -152,12 +167,12 @@ public class CacheWrapper<K, V> implements Cache<K, V> {
 
     @Override
     public void registerCacheEntryListener(CacheEntryListenerConfiguration<K, V> kvCacheEntryListenerConfiguration) {
-
+        throw new UnsupportedOperationException(NOT_ALLOWED);
     }
 
     @Override
     public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<K, V> kvCacheEntryListenerConfiguration) {
-
+        throw new UnsupportedOperationException(NOT_ALLOWED);
     }
 
     @Override

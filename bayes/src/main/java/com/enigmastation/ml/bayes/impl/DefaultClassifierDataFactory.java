@@ -24,6 +24,9 @@ import org.infinispan.manager.EmbeddedCacheManager;
 
 import java.io.IOException;
 
+/**
+ * TODO: Needs to be done
+ */
 public class DefaultClassifierDataFactory implements ClassifierDataFactory {
     static EmbeddedCacheManager cacheManager;
 
@@ -31,7 +34,7 @@ public class DefaultClassifierDataFactory implements ClassifierDataFactory {
         try {
             cacheManager = new DefaultCacheManager("bayes-cache.xml");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException();
         }
     }
 

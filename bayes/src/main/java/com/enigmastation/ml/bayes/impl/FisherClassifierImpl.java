@@ -26,10 +26,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+/**
+ * TODO: Needs to be done
+ */
 @BayesClassifier
 @FisherBayesClassifier
 public class FisherClassifierImpl extends SimpleClassifierImpl implements FisherClassifier {
     Map<Object, Double> minimums = new HashMap<>();
+
+    /**
+     * Constructs the object
+     */
+    public FisherClassifierImpl() {
+        super();
+    }
+
+    /**
+     * Constructs the object
+     *
+     * @param factory
+     */
+    public FisherClassifierImpl(ClassifierDataFactory factory) {
+        super(factory);
+    }
 
     /**
      * This accesses the current minimum strength for the category. If the probability of a
@@ -59,17 +78,10 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
         minimums.put(category, strength);
     }
 
-    public FisherClassifierImpl() {
-        super();
-    }
-
-    public FisherClassifierImpl(ClassifierDataFactory factory) {
-        super(factory);
-    }
-
     @Override
     protected double featureProb(Object feature, Object category) {
         double clf = super.featureProb(feature, category);
+        // TODO: Floating point values shouldn't be tested for equality
         if (clf == 0.0) {
             return 0.0;
         }
@@ -79,26 +91,23 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
                 .stream()
                 .mapToDouble(c -> super.featureProb(feature, c))
                 .sum();
-//        for (Object c : categories()) {
-//            frequencySum += super.featureProb(feature, c);
-//        }
         return clf / frequencySum;
     }
 
     protected double fisherProbability(Object source, Object category) {
-        final double p[] = {1.0};
+        final double[] p = {1.0};
         List<Object> features = getFeatures(source);
         features
                 .stream()
                 .mapToDouble(f -> weightedProb(f, category))
                 .forEach(w -> p[0] *= w);
         double fisherScore = -2.0 * Math.log(p[0]);
-        return invChi(fisherScore, features.size() * 2);
+        return invChi(fisherScore, ((double) features.size()) * 2);
     }
 
     protected double invChi(double chi, double df) {
         double m = chi / 2.0;
-        final double sum[] = {Math.exp(-m)};
+        final double[] sum = {Math.exp(-m)};
         final double[] term = {sum[0]};
         IntStream.range(1, (int) (df / 2))
                 .forEach(i -> {
@@ -120,7 +129,7 @@ public class FisherClassifierImpl extends SimpleClassifierImpl implements Fisher
     public Object classify(Object source, Object defaultClassification) {
         Object[] best = {defaultClassification};
         double[] max = {0.0};
-        categories().stream().forEach(c -> {
+        getCategoriesKeySet().stream().forEach(c -> {
             double p = fisherProbability(source, c);
             if (p > getMinimum(c) && p > max[0]) {
                 best[0] = c;
