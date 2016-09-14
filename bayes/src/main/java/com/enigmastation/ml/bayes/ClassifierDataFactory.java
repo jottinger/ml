@@ -18,11 +18,27 @@ package com.enigmastation.ml.bayes;
 
 import org.infinispan.Cache;
 
+/**
+ * TODO: Needs to be done
+ */
 public interface ClassifierDataFactory {
+    /**
+     * Needs to be done
+     *
+     * @return
+     */
     Cache<Object, Integer> buildCategories();
 
+    /**
+     * TODO: Needs to be done
+     *
+     * @return
+     */
     Cache<Object, Feature> buildFeatures();
 
+    /**
+     * TODO: Needs to be done
+     */
     default void clear() {
         buildCategories().clear();
         buildFeatures().clear();

@@ -141,7 +141,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
     @Override
     public Map<Object, Double> getClassificationProbabilities(Object source) {
         Map<Object, Double> probabilities = new HashMap<>();
-        for (Object category : categories()) {
+        for (Object category : getCategories()) {
             probabilities.put(category, documentProbability(source, category));
         }
         return probabilities;
@@ -222,7 +222,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         return sum;
     }
 
-    protected Set<Object> categories() {
+    protected Set<Object> getCategories() {
         return categories.keySet();
     }
 
@@ -237,7 +237,7 @@ public class SimpleClassifierImpl implements SimpleClassifier {
         double basicProbability = featureProb(feature, category);
 
         double totals = 0;
-        for (Object cat : categories()) {
+        for (Object cat : getCategories()) {
             totals += featureCount(feature, cat);
         }
         return ((weight * assumedProbability) + (totals * basicProbability)) / (weight + totals);
@@ -253,9 +253,9 @@ public class SimpleClassifierImpl implements SimpleClassifier {
 
     /* naive bayes, very naive - and not what we usually need. */
     private double documentProbability(Object source, Object category) {
-        List<Object> features = getFeatures(source);
+        List<Object> documentProbabilityFeatures = getFeatures(source);
         double p = 1.0;
-        for (Object f : features) {
+        for (Object f : documentProbabilityFeatures) {
             p *= weightedProb(f, category);
         }
         return p;
