@@ -6,10 +6,10 @@
     <parent>
         <groupId>com.enigmastation.ml</groupId>
         <artifactId>ml-parent</artifactId>
-        <version>4.0-SNAPSHOT</version>
+        <version>4.0</version>
     </parent>
     <artifactId>perceptron</artifactId>
-    <version>4.0-SNAPSHOT</version>
+    <version>4.0</version>
     <name>perceptron</name>
     <url>http://maven.apache.org</url>
     <properties>
